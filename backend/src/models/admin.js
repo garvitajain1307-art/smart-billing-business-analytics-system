@@ -1,7 +1,7 @@
 // import bcrypt from "bcrypt";
 import mongoose from "mongoose";
-// import jwt from "jsonwebtoken";
-// import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 
 const adminSchema=mongoose.Schema({
@@ -37,7 +37,7 @@ const adminSchema=mongoose.Schema({
     companyId:{ 
         type:mongoose.Schema.Types.ObjectId,
         ref:"Company",
-        required:true
+        
             
     },
 
@@ -45,6 +45,13 @@ const adminSchema=mongoose.Schema({
 {
     timestamps:true,
 })
+
+adminSchema.methods.generateToken=function(){
+    return jwt.sign({id:this._id },process.env.JWT_SECRET,{
+        expiresIn:process.env.JWT_EXPIRE,
+    }
+    )
+}
 
 
 
