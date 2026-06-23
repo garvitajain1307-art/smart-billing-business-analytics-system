@@ -1,0 +1,243 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Inter, "Segoe UI", sans-serif;
+}
+
+.auth-page{
+    height:100vh;
+    display:flex;
+    overflow:hidden;
+}
+
+/* LEFT */
+
+.left-landing-page{
+    width:52%;
+    padding:35px 50px;
+    color:white;
+    background:linear-gradient(135deg,#2563eb,#4f46e5);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+/* TOP LOGO */
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:40px;
+}
+
+.logo h1{
+    font-size:2rem;
+    font-weight:600;
+    margin:0;
+    line-height:1;
+}
+
+.logo svg{
+    width:36px;
+    height:36px;
+    padding:8px;
+    margin-bottom:10px;
+    margin-top: 15px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.12);
+    color:white;
+    transition:all 0.3s ease;
+    
+}
+
+/* HEADINGS */
+
+.left-landing-page h2{
+    font-size:clamp(2rem,3vw,3rem);
+    line-height:1.15;
+    font-weight:600;
+    margin-bottom:14px;
+    max-width:650px;
+}
+
+.left-landing-page > p{
+    font-size:1rem;
+    color:#dbeafe;
+    line-height:1.5;
+    margin-bottom:24px;
+}
+
+/* FEATURE CARDS */
+
+.feature-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+}
+
+.feature-card{
+    min-height:145px;
+    padding:18px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.15);
+    backdrop-filter:blur(10px);
+    transition:all 0.3s ease;
+}
+
+.feature-card:hover{
+    transform:translateY(-5px);
+    background:rgba(255,255,255,0.18);
+    box-shadow:0 15px 30px rgba(0,0,0,0.18);
+}
+
+.feature-card svg{
+    width:36px;
+    height:36px;
+    padding:8px;
+    margin-bottom:12px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.12);
+    color:white;
+    transition:all 0.3s ease;
+}
+
+.feature-card:hover svg{
+    transform:scale(1.08);
+    background:rgba(255,255,255,0.22);
+}
+
+.feature-card h3{
+    font-size:1.05rem;
+    font-weight:600;
+    margin-bottom:8px;
+}
+
+.feature-card p{
+    font-size:0.9rem;
+    line-height:1.45;
+    color:#e0e7ff;
+}
+
+/* RIGHT */
+
+.right-landing-page{
+    width:48%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(180deg,#f8fafc,#eef2ff);
+}
+
+/* FORM CARD */
+
+.signup-container{
+    width:430px;
+    padding:28px;
+    background:white;
+    border-radius:22px;
+    border:2px solid transparent;
+    box-shadow:0 20px 50px rgba(15,23,42,0.12);
+    transition:all 0.3s ease;
+}
+
+.signup-container:hover{
+    border-color:#60a5fa;
+    box-shadow:
+        0 20px 50px rgba(15,23,42,0.12),
+        0 0 25px rgba(96,165,250,0.25);
+}
+
+/* TABS */
+
+.choose-method{
+    display:flex;
+    background:#e5e7eb;
+    border-radius:999px;
+    padding:4px;
+    margin-bottom:25px;
+}
+
+.choose-btn,
+.active-tab{
+    flex:1;
+    border:none;
+    padding:11px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:600;
+    transition:all 0.25s ease;
+}
+
+.choose-btn{
+    background:transparent;
+    color:#64748b;
+}
+
+.choose-btn:hover{
+    color:#2563eb;
+}
+
+.active-tab{
+    background:white;
+    color:#111827;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* FORMS */
+
+.signup-form,
+.login-form{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.signup-form input,
+.login-form input{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#f1f5f9;
+    outline:none;
+    transition:all 0.25s ease;
+}
+
+.signup-form input:hover,
+.login-form input:hover{
+    background:#e9eef5;
+}
+
+.signup-form input:focus,
+.login-form input:focus{
+    background:white;
+    box-shadow:0 0 0 3px rgba(37,99,235,0.18);
+}
+
+/* SUBMIT */
+
+.signup-form button[type="submit"],
+.login-form button[type="submit"]{
+    margin-top:5px;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#2563eb,#4f46e5);
+    color:white;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s ease;
+}
+
+.signup-form button[type="submit"]:hover,
+.login-form button[type="submit"]:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(37,99,235,0.35);
+}
