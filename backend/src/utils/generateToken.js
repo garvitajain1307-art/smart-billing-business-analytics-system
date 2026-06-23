@@ -6,7 +6,13 @@ export const generateToken=(admin,statusCode,message,res)=>{
         httpOnly:true
     }).json({
         success:true,
-        admin,
+        admin: {
+            id: admin._id,
+            name: admin.name,
+            email: admin.email,
+            phone: admin.phone,
+            companyId: admin.companyId,
+  },
         message,
         token,
     });

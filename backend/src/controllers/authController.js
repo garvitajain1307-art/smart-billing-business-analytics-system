@@ -82,3 +82,59 @@ export const registerAdmin=[
     })
 
 ]
+
+export const login=[
+    check('email')
+    .notEmpty()
+    .withMessage('Email is required')
+    
+    ,
+    check('password')
+    .notEmpty()
+    .withMessage('Password is required')
+
+    ,
+    asyncHandler(async(req,res,next)=>{
+    
+
+    const {email,password}=req.body;
+
+    const errors=validationResult(req);
+        if(!errors.isEmpty()){
+            return res.status(422).json({
+               errors: errors.array().map(err => err.msg),
+               oldInput: { email}
+
+             })
+        }
+        
+    const admin = await Admin.findOne({ email }).select("+password");
+    if(!admin){
+        return next(new ErrorHandler("Invalid credentials",401));
+
+    }
+    const isMatch=await bcrypt.compare(password,admin.password);
+    if(isMatch===false){
+        return next(new ErrorHandler("Invalid credentials",401));
+    }
+    
+    
+    generateToken(admin,200,"Login successfull",res);
+    
+
+
+})
+
+]
+
+export const logout=asyncHandler(async(req,res,next)=>{
+    res.status(200).cookie("token","", {
+        expires:new Date(Date.now()),
+        httpOnly:true
+    }).json({
+        success:true,
+        message:"Logged out successfully",
+
+    })
+    
+})
