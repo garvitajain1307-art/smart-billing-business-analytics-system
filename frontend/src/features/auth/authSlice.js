@@ -11,29 +11,29 @@ const authSlice=createSlice({
     },
     reducers:{
         setLoading:(state)=>{
-            state.loading=true
-            state.error=null
+            state.loading=true;
+            state.error=null;
 
         },
         setAdmin:(state,action)=>{
-            state.admin=action.payload
-            state.isAuthenticated=true,
-            state.loading=false,
-            state.error=null
+            state.admin=action.payload;
+            state.isAuthenticated=true;
+            state.loading=false;
+            state.error=null;
         },
         setError:(state,action)=>{
-            state.error=action.payload,
+            state.error=action.payload;
             state.loading = false;
         },
         logoutAdmin:(state)=>{
-            state.admin=null
-            state.isAuthenticated=false,
-            state.loading=false,
-            state.error=null
+            state.admin=null;
+            state.isAuthenticated=false;
+            state.loading=false;
+            state.error=null;
             
         },
         clearError:(state)=>{
-            state.error=null
+            state.error=null;
         }
     }
 })

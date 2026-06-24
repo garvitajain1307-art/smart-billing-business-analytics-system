@@ -1,9 +1,15 @@
 import { useState } from "react"
 import "./AuthPage.css";
 import {ReceiptIndianRupee,FileText,ChartColumn,ShoppingCart,TrendingUp } from "lucide-react"
+import {useDispatch,useSelector} from "react-redux"
+import {useNavigate} from "react-router-dom"
+import {setLoading,setAdmin,setError,logoutAdmin,clearError} from "../features/auth/authSlice"
 
 
-export const AuthPage=()=>{
+const AuthPage=()=>{
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const {error,loading}=useSelector((state)=>state.auth)
     const [isSignup,setIsSignup]=useState(true);
     const [signupData, setSignupData] = useState({
       name: "",
@@ -18,6 +24,7 @@ export const AuthPage=()=>{
       password: "",
     });
     const handleSignupChange=(e)=>{
+         dispatch(clearError());
         setSignupData({
             ...signupData,
             [e.target.name]:e.target.value,
@@ -26,6 +33,7 @@ export const AuthPage=()=>{
 
     }
     const handleLoginChange=(e)=>{
+         dispatch(clearError());
         setLoginData({
             ...loginData,
             [e.target.name]:e.target.value,
@@ -33,9 +41,29 @@ export const AuthPage=()=>{
         })
 
     }
-    const handleSignupSubmit=(e)=>{
-        e.preventDefault();
-        console.log(signupData)
+    const handleSignupSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+        dispatch(setLoading());
+
+        const res = await fetch("http://localhost:4000/api/v1/admin/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify(signupData),
+        });
+
+        const data = await res.json();
+        console.log(data);
+
+        if (!data.success) {
+            dispatch(setError(data.message || data.errors?.[0] || "Signup failed"));
+            return;
+        }
+
         
         setSignupData({
             name: "",
@@ -44,16 +72,59 @@ export const AuthPage=()=>{
             password: "",
             confirmPassword: ""
         });
+       
+
+        setIsSignup(false);
+        dispatch(clearError());
+
+    } catch (error) {
+        dispatch(setError("Something went wrong"));
     }
-    const handleLoginSubmit=(e)=>{
-        e.preventDefault();
-        console.log(loginData)
-        
+};
+    const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+        dispatch(setLoading());
+
+        const res = await fetch("http://localhost:4000/api/v1/admin/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify(loginData),
+        });
+
+        const data = await res.json();
+        console.log(data);
+
+        if (!data.success) {
+            dispatch(setError(data.message || data.errors?.[0] || "Login failed"));
+            setLoginData({
+                email: "",
+                password: "",
+            });
+            return;
+        }
+
+        dispatch(setAdmin(data.admin));
+
         setLoginData({
             email: "",
             password: "",
         });
+
+        if (data.admin.companyId) {
+            navigate("/dashboard");
+        } else {
+            navigate("/company/setup");
+        }
+
+    } catch (error) {
+        dispatch(setError("Something went wrong"));
     }
+};
     return(
         <div className="auth-page">
             <div className="left-landing-page">
@@ -97,11 +168,12 @@ export const AuthPage=()=>{
                 <div className="signup-container">
                     <div className="choose-method">
                          {/* type="button" => normal click button (does not submit form) */}
-                        <button type="button" className={!isSignup ? "active-tab" : "choose-btn"} onClick={() => setIsSignup(false)}>Login</button>
-                        <button type="button" className={isSignup ? "active-tab" : "choose-btn"} onClick={() => setIsSignup(true)}>Sign Up</button>
+                        <button type="button" className={!isSignup ? "active-tab" : "choose-btn"} onClick={() => {dispatch(clearError());setIsSignup(false)}}>Login</button>
+                        <button type="button" className={isSignup ? "active-tab" : "choose-btn"} onClick={() => {dispatch(clearError()); setIsSignup(true)}}>Sign Up</button>
                     
 
                     </div>
+                    {error && <p className="auth-error">{error}</p>}
                     {isSignup?(
                         <form className="signup-form" onSubmit={handleSignupSubmit}>
                             
@@ -128,3 +200,5 @@ export const AuthPage=()=>{
         
     )
 }
+
+export default AuthPage;

@@ -138,3 +138,13 @@ export const logout=asyncHandler(async(req,res,next)=>{
     })
     
 })
+
+export const getAdmin = asyncHandler(async (req, res, next) => {
+    const admin = req.admin;
+
+    res.status(200).json({
+        success: true,
+        message: "Admin found",
+        admin
+    });
+});

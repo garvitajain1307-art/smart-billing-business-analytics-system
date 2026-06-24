@@ -34,11 +34,10 @@ const adminSchema=mongoose.Schema({
     },
     resetPasswordToken:String,
     resetPasswordExpire:Date,
-    companyId:{ 
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Company",
-        
-            
+    companyId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Company",
+        default: null,
     },
 
 },

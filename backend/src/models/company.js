@@ -11,6 +11,13 @@ const companySchema=mongoose.Schema({
         trim:true,
         maxLength:[100,'Length cannot exceed 100 characters']
     },
+    ownerName:{
+        type:String,
+        required:[true,'Owner name is required'],
+        trim:true,
+        maxLength:[50,'Length cannot exceed 50 characters']
+
+    },
     gstNo:{
         type:String,
         required:[true,'GST number is required'],
@@ -18,11 +25,12 @@ const companySchema=mongoose.Schema({
         unique:true
         
     },
-    // adminId:{
-    //     type:mongoose.Schema.Types.ObjectId,
-    //     ref:"Admin",
-    //     required:true
-    // },
+    adminId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Admin",
+        required:true,
+        unique:true
+    },
     address:{
         type:String,
         required:[true,'Company address is required'],

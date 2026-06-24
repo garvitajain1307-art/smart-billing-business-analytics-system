@@ -241,3 +241,14 @@ body{
     transform:translateY(-2px);
     box-shadow:0 12px 25px rgba(37,99,235,0.35);
 }
+
+.auth-error {
+    color: #dc2626;
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 14px;
+    text-align: center;
+}
