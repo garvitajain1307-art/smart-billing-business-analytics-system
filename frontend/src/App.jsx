@@ -5,6 +5,7 @@ import {BrowserRouter,Routes,Route} from 'react-router-dom'
 import AuthPage from './pages/AuthPage'
 import CompanySetup from './pages/CompanySetup'
 import Dashboard from './pages/Dashboard'
+import CompanySetupSuccess from './pages/CompanySetUpSuccess'
 
 function App() {
   const dispatch = useDispatch();
@@ -39,6 +40,7 @@ function App() {
       <Route path="/" element={<AuthPage/>}/>
       <Route path="/company/setup" element={<CompanySetup/>}/>
       <Route path="/dashboard" element={<Dashboard/>}/>
+      <Route path="/company/setup/success" element={<CompanySetupSuccess/>}/>
     </Routes>
     
     </BrowserRouter>
