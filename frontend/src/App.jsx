@@ -1,14 +1,28 @@
 import { useState,useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { setAdmin } from './features/auth/authSlice'
-import {BrowserRouter,Routes,Route} from 'react-router-dom'
+import {BrowserRouter,Routes,Route,Navigate} from 'react-router-dom'
+import { useSelector } from 'react-redux';
+
+import Analytics from './pages/Analytics';
 import AuthPage from './pages/AuthPage'
+import Billing from './pages/Billing';
 import CompanySetup from './pages/CompanySetup'
-import Dashboard from './pages/Dashboard'
 import CompanySetupSuccess from './pages/CompanySetUpSuccess'
+import Customers from './pages/Customers';
+import Dashboard from './pages/Dashboard';
+import Invoices from './pages/Invoices';
+import Notifications from './pages/Notifications';
+import Products from './pages/Products';
+import Settings from './pages/Settings';
+
+
+
 
 function App() {
   const dispatch = useDispatch();
+ 
+  const { admin, isAuthenticated } = useSelector((state) => state.auth);
   useEffect(() => {
         
         const getMe = async () => {
@@ -35,12 +49,21 @@ function App() {
   
 
   return (
+    
     <BrowserRouter>
     <Routes>
-      <Route path="/" element={<AuthPage/>}/>
-      <Route path="/company/setup" element={<CompanySetup/>}/>
-      <Route path="/dashboard" element={<Dashboard/>}/>
-      <Route path="/company/setup/success" element={<CompanySetupSuccess/>}/>
+      <Route path="/" element={isAuthenticated ? (admin?.companyId ? <Navigate to="/dashboard"/> : <Navigate to="/company/setup"/>) : <AuthPage/>}/>
+      <Route path="/company/setup" element={!isAuthenticated ? <Navigate to="/"/> : admin?.companyId ? <Navigate to="/dashboard"/> : <CompanySetup/>}/>
+      <Route path="/company/setup/success" element={!isAuthenticated ? <Navigate to="/"/> : <CompanySetupSuccess/>}/>
+      <Route path="/dashboard" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Dashboard/>}/> 
+      <Route path="/billing" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Billing/>}/>
+ 
+      <Route path="/products" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Products/>}/>
+      <Route path="/customers" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Customers/>}/>
+      <Route path="/invoices" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Invoices/>}/>
+      <Route path="/analytics" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Analytics/>}/>
+      <Route path="/notifications" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Notifications/>}/>
+      <Route path="/settings" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Settings/>}/>
     </Routes>
     
     </BrowserRouter>
