@@ -37,6 +37,10 @@ export const addProduct=[
     .notEmpty()
     .withMessage('Unit Type is required')
     ,
+    check("hsnCode")
+    .notEmpty()
+    .withMessage("HSN Code is required")
+    ,
 
     asyncHandler(async(req,res,next)=>{
     
