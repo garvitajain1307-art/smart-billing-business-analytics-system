@@ -3,6 +3,7 @@ import cors from 'cors';
 import {config} from "dotenv";
 import authRouter from './routes/adminRoutes.js';
 import companyRouter from './routes/companyRoutes.js'
+import categoryRouter from './routes/categoryRoutes.js'
 
 import cookieParser from "cookie-parser";
 import { errorMiddleware } from './middlewares/error.js';
@@ -26,6 +27,8 @@ app.use(express.urlencoded({extended:true}));
 
 app.use("/api/v1/admin", authRouter);
 app.use("/api/v1/company",companyRouter);
+app.use("/api/v1/category",categoryRouter);
+
 
 
 app.use(errorMiddleware);

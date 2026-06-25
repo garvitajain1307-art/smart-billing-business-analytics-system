@@ -43,6 +43,7 @@ export const registerCompany=[
     const errors=validationResult(req);
         if(!errors.isEmpty()){
             return res.status(422).json({
+                success: false,
                errors: errors.array().map(err => err.msg),
                oldInput: { companyName,ownerName,gstNo,email,phone,address}
 

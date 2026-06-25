@@ -9,7 +9,7 @@ const productSchema=mongoose.Schema({
         type:String,
         required:[true,'Product Code is required'],
         trim:true,
-        unique:true,
+        
         maxLength:[20,'Length cannot exceed 20 characters']
     },
     name:{
@@ -55,13 +55,23 @@ const productSchema=mongoose.Schema({
     },
     unitType:{
         type:String,
-        enum:["l","ml","kg","g","pcs"]
+        enum:["l","ml","kg","g","pcs"],
+        required:true
 
     },
     hsnId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"HSNMaster",
-        required:true
+        default: null
+    },
+    hsnCode: {
+        type: String,
+        default: null,
+    },
+
+    gstRate: {
+        type: Number,
+        default: 0,
     },
     description:{
         type:String,
@@ -85,13 +95,17 @@ const productSchema=mongoose.Schema({
     type:mongoose.Schema.Types.ObjectId,
     ref:"Company",
     required:true
-}
+    }
     
 
 },
 {
     timestamps:true,
 })
+
+//Compound Index. The combination of productCode and companyId must be unique.
+
+productSchema.index({ productCode: 1, companyId: 1 }, { unique: true });
 
 
 const Product=mongoose.model('Product',productSchema);
