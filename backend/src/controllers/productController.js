@@ -121,3 +121,171 @@ export const addProduct=[
 })
 
 ]
+
+export const getAllProducts=asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+    if(!companyId){
+        return next(new ErrorHandler("Please setup your company first", 400));
+
+    }
+
+    const products=await Product.find({companyId}).populate("categoryId", "name").sort({name:1});
+    res.status(200).json({
+        success: true,
+        message: "All products fetched successfully",
+        products
+    });
+})
+
+export const getProduct=asyncHandler(async(req,res,next)=>{
+    
+    const companyId=req.admin.companyId;
+
+    if (!companyId) {
+        return next(new ErrorHandler("Please setup your company first", 400));
+    }
+
+    const productId=req.params.productId;
+    if(!productId){
+        return next(new ErrorHandler("Please enter a productId first", 400));
+
+    }
+        
+    const product=await Product.findOne({_id:productId,companyId}).populate("categoryId");
+    if (!product) {
+        return next(new ErrorHandler("Product not found", 404));
+    }
+
+        
+    res.status(200).json({
+        success: true,
+        message: "Product fetched successfully",
+        product
+    });
+})
+
+export const deleteProduct=asyncHandler(async(req,res,next)=>{
+    
+    const companyId=req.admin.companyId;
+
+    if (!companyId) {
+        return next(new ErrorHandler("Please setup your company first", 400));
+    }
+
+    const productId=req.params.productId;
+    if(!productId){
+        return next(new ErrorHandler("Please enter a productId first", 400));
+
+    }
+        
+    const product=await Product.findOne({_id:productId,companyId});
+    if (!product) {
+        return next(new ErrorHandler("Product not found", 404));
+    }
+    await product.deleteOne()
+
+        
+    res.status(200).json({
+        success: true,
+        message: "Product deleted successfully",
+        
+    });
+})
+
+export const updateProduct = asyncHandler(async (req, res, next) => {
+    const companyId = req.admin.companyId;
+
+    if (!companyId) {
+        return next(new ErrorHandler("Please setup your company first", 400));
+    }
+
+    const productId = req.params.productId;
+
+    if (!productId) {
+        return next(new ErrorHandler("Please enter a productId first", 400));
+    }
+
+    const product = await Product.findOne({ _id: productId, companyId });
+
+    if (!product) {
+        return next(new ErrorHandler("Product not found", 404));
+    }
+
+    const {
+        productCode,
+        name,
+        categoryId,
+        subCategory,
+        purchasePrice,
+        sellingPrice,
+        quantity,
+        unit,
+        unitType,
+        hsnCode,
+        description,
+        expiry,
+        manufacturer,
+    } = req.body;
+
+    const finalPurchasePrice = purchasePrice !== undefined ? Number(purchasePrice) : product.purchasePrice;
+    const finalSellingPrice = sellingPrice !== undefined ? Number(sellingPrice) : product.sellingPrice;
+
+    if (finalSellingPrice < finalPurchasePrice) {
+        return next(new ErrorHandler("Selling Price must be greater than or equal to Purchase Price", 400));
+    }
+
+    if (productCode && productCode !== product.productCode) {
+        const existingProduct = await Product.findOne({
+            productCode,
+            companyId,
+            _id: { $ne: productId },
+        });
+
+        if (existingProduct) {
+            return next(new ErrorHandler("Product with this Product Code already exists", 400));
+        }
+
+        product.productCode = productCode;
+    }
+
+    if (categoryId && categoryId !== product.categoryId.toString()) {
+        const category = await Category.findOne({ _id: categoryId, companyId });
+
+        if (!category) {
+            return next(new ErrorHandler("Invalid Category Selected", 400));
+        }
+
+        product.categoryId = categoryId;
+    }
+
+    if (hsnCode && hsnCode !== product.hsnCode) {
+        const hsn = await HSNMaster.findOne({ hsnCode: hsnCode.trim() });
+
+        if (!hsn) {
+            return next(new ErrorHandler("Invalid HSN code", 400));
+        }
+
+        product.hsnId = hsn._id;
+        product.hsnCode = hsn.hsnCode;
+        product.gstRate = hsn.gstRate;
+    }
+
+    if (name !== undefined) product.name = name;
+    if (subCategory !== undefined) product.subCategory = subCategory;
+    if (purchasePrice !== undefined) product.purchasePrice = purchasePrice;
+    if (sellingPrice !== undefined) product.sellingPrice = sellingPrice;
+    if (quantity !== undefined) product.quantity = quantity;
+    if (unit !== undefined) product.unit = unit;
+    if (unitType !== undefined) product.unitType = unitType;
+    if (description !== undefined) product.description = description;
+    if (expiry !== undefined) product.expiry = expiry;
+    if (manufacturer !== undefined) product.manufacturer = manufacturer;
+
+    await product.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Product updated successfully",
+        product,
+    });
+});

@@ -2,6 +2,7 @@ import { asyncHandler } from "../middlewares/asyncHandler.js";
 import ErrorHandler from "../middlewares/error.js";
 import Category from "../models/category.js";
 import { check, validationResult } from "express-validator";
+import Product from "../models/product.js";
 
 
 export const addCategory=[
@@ -59,3 +60,4 @@ export const getAllCategories=asyncHandler(async(req,res,next)=>{
 
 
 })
+
