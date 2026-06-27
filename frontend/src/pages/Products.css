@@ -312,12 +312,20 @@
 }
 
 .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
     padding: 6px 11px;
     border-radius: 999px;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 500;
 }
 
+.status svg {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
 .in-stock {
     background: #dcfce7;
     color: #059669;

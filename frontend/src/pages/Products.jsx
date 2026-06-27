@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import {
     Search,
@@ -17,12 +17,100 @@ import {
     TrendingUp,
     TrendingDown,
     ChevronDown,
-    Check
+    Check,Dot
 } from "lucide-react";
 import "./Products.css";
+import { useDispatch, useSelector } from "react-redux";
+import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct} from "../features/product/productSlice"
 
 const Products = () => {
     const [extended, setExtended] = useState(false);
+    const [search,setSearch]=useState("");
+    const [selectedCategory, setSelectedCategory] = useState("All categories");
+    const [selectedStock, setSelectedStock] = useState("All stock");
+    const [categoryOpen, setCategoryOpen] = useState(false);
+    const [stockOpen, setStockOpen] = useState(false);
+    const dispatch=useDispatch();
+    const { products, loading, error } = useSelector((state) => state.product);
+    
+    
+    useEffect(() => {
+    const fetchProducts = async () => {
+        try {
+            dispatch(setProductLoading());
+
+            const res = await fetch(
+                "http://localhost:4000/api/v1/products/getAllProducts",
+                {
+                    credentials: "include",
+                }
+            );
+
+            const data = await res.json();
+
+            if (!data.success) {
+                dispatch(setProductError(data.message));
+                return;
+            }
+
+            dispatch(setProducts(data.products));
+        } catch (err) {
+            dispatch(setProductError(err.message));
+        }
+    };
+
+    fetchProducts();
+}, []);
+    
+    const filteredProducts=products.filter((product)=>{
+      const searchText=search.trim().toLowerCase();
+      return(
+        product.name.toLowerCase().includes(searchText)||
+        product.productCode.toLowerCase().includes(searchText)||
+        product.hsnCode.toLowerCase().includes(searchText)
+      );
+    })
+
+    const getProductStatus=(quantity)=>{
+      if(quantity==0){
+        
+        return{
+          label:"Out of Stock",
+          className:"out-stock"
+        }
+      }else if(quantity<=10){
+        
+        
+        return{
+          label:"Low Stock",
+          className:"low-stock"
+        }
+      }else{
+        
+    
+        return{
+          label:"In Stock",
+          className:"in-stock"
+        }
+      }
+    }
+
+    const inStock=products.filter((product)=>{
+      return getProductStatus(product.quantity).label==="In Stock"
+    });
+    const inStockTotal=inStock.length;
+
+    const outOfStock=products.filter((product)=>{
+      return getProductStatus(product.quantity).label==="Out of Stock"
+    });
+    const outOfStockTotal=outOfStock.length;
+
+    const lowStock=products.filter((product)=>{
+      return getProductStatus(product.quantity).label==="Low Stock"
+    });
+    const lowStockTotal=lowStock.length;
+
+    
 
     return (
       <div className={`products-page ${extended ? "extended" : ""}`}>
@@ -32,10 +120,7 @@ const Products = () => {
           <div className="products-navbar">
     <div className="searchProducts">
         <Search size={20} className="search-icon" />
-        <input
-            type="text"
-            placeholder="Search by product name, code or HSN..."
-        />
+        <input type="text" placeholder="Search by product name, code or HSN..." value={search} onChange={(e)=> setSearch(e.target.value)}/>
     </div>
 
     <div className="custom-dropdown">
@@ -98,7 +183,7 @@ const Products = () => {
               <div className="insight-card">
                 <div>
                   <p>Total Products</p>
-                  <h2>10</h2>
+                  <h2>{products.length}</h2>
                   <span className="green-text">
                     <ArrowUpRight size={15} /> +8 this month
                   </span>
@@ -111,7 +196,7 @@ const Products = () => {
               <div className="insight-card">
                 <div>
                   <p>In Stock</p>
-                  <h2>6</h2>
+                  <h2>{inStockTotal}</h2>
                   <span className="green-text">
                     <ArrowUpRight size={15} /> Healthy levels
                   </span>
@@ -124,7 +209,7 @@ const Products = () => {
               <div className="insight-card">
                 <div>
                   <p>Low Stock</p>
-                  <h2>3</h2>
+                  <h2>{lowStockTotal}</h2>
                   <span className="red-text">
                     <ArrowDownRight size={15} /> Needs attention
                   </span>
@@ -137,7 +222,7 @@ const Products = () => {
               <div className="insight-card">
                 <div>
                   <p>Out of Stock</p>
-                  <h2>1</h2>
+                  <h2>{outOfStockTotal}</h2>
                   <span className="red-text">
                     <ArrowDownRight size={15} /> Restock now
                   </span>
@@ -152,7 +237,7 @@ const Products = () => {
               <div className="catalogue-header">
                 <div>
                   <h3>Product catalogue</h3>
-                  <p>10 of 10 products</p>
+                  <p>{filteredProducts.length} of {products.length} products</p>
                 </div>
                 <button className="live-sync-btn">Live sync</button>
               </div>
@@ -174,27 +259,32 @@ const Products = () => {
                   </thead>
 
                   <tbody>
-                    <tr>
+                    {filteredProducts.map((product)=>{
+                      const status = getProductStatus(product.quantity);
+                     return( 
+                      <tr key={product._id}>
+                        
                       <td>
                         <div className="product-info">
-                          <span className="product-avatar">HN</span>
+                          <span className="product-avatar">{product.name?.split(" ").map((word)=>word[0]).slice(0,2).join("").toUpperCase()}</span>
                           <div>
-                            <h4>Himalaya Neem Face Wash</h4>
-                            <p>Himalaya Wellness</p>
+                            <h4>{product.name?.toUpperCase()}</h4>
+                            <p>{product.manufacturer || "No manufacturer"}</p>
                           </div>
                         </div>
                       </td>
-                      <td>HM-NFW-100</td>
+                      <td>{product.productCode}</td>
                       <td>
-                        <span className="category-pill">Personal Care</span>
+                        <span className="category-pill">{product.categoryId?.name || "Uncategorized"}</span>
                       </td>
-                      <td>3304</td>
-                      <td>₹165</td>
-                      <td>₹110</td>
-                      <td>84</td>
-                      <td>18%</td>
+                      <td>{product.hsnCode || "-"}</td>
+                      <td>₹{product.sellingPrice}</td>
+                      <td>₹{product.purchasePrice}</td>
+                      <td>{product.quantity}</td>
+                      <td>{product.gstRate}%</td>
                       <td>
-                        <span className="status in-stock">In Stock</span>
+                        
+                    <span className={`status ${status.className}`}><Dot size={30}/>{status.label}</span>
                       </td>
                       <td>
                         <div className="action-icons">
@@ -205,6 +295,8 @@ const Products = () => {
                         </div>
                       </td>
                     </tr>
+
+                    )})}
                   </tbody>
                 </table>
               </div>
@@ -226,22 +318,27 @@ const Products = () => {
                         <p>Stock below threshold</p>
                       </div>
                     </div>
-                    <h2>3</h2>
+                    <h2>{lowStockTotal}</h2>
                   </div>
 
                   <div className="alert-list">
-                    <div className="alert-item">
+                   {lowStock.map((product)=>{
+                    return(
+                    
+                    <div className="alert-item" key={product._id}>
                       <div>
-                        <h5>Amul Gold Full Cream Milk</h5>
-                        <p>12 1 L left · AM-GLD-1L</p>
+                        <h5>{product.name}</h5>
+                        <p>{product.quantity} {product.unit} {product.unitType} left</p>
                       </div>
                       <div className="alert-actions">
                         <button>Edit</button>
                         <button>Restock</button>
                       </div>
                     </div>
+                    )
+                   })}
 
-                    <div className="alert-item">
+                    {/* <div className="alert-item">
                       <div>
                         <h5>Surf Excel Matic Liquid</h5>
                         <p>9 2 L left · SE-MTC-2L</p>
@@ -250,18 +347,9 @@ const Products = () => {
                         <button>Edit</button>
                         <button>Restock</button>
                       </div>
-                    </div>
+                    </div> */}
 
-                    <div className="alert-item">
-                      <div>
-                        <h5>Parle-G Original Biscuits</h5>
-                        <p>6 800 g left · PG-ORG-800</p>
-                      </div>
-                      <div className="alert-actions">
-                        <button>Edit</button>
-                        <button>Restock</button>
-                      </div>
-                    </div>
+                    
                   </div>
                 </div>
 
@@ -276,20 +364,26 @@ const Products = () => {
                         <p>Sold out — restock urgently</p>
                       </div>
                     </div>
-                    <h2>1</h2>
+                    <h2>{outOfStockTotal}</h2>
                   </div>
 
                   <div className="alert-list">
-                    <div className="alert-item">
+                    {outOfStock.map((product)=>{
+                      return(
+                        <div className="alert-item">
                       <div>
-                        <h5>Tata Salt Iodized</h5>
-                        <p>0 1 kg left · TS-IOD-1KG</p>
+                        <h5>{product.name}</h5>
+                        <p>0 {product.quantity} {product.unitType} left</p>
                       </div>
                       <div className="alert-actions">
                         <button>Edit</button>
                         <button>Restock</button>
                       </div>
                     </div>
+                        
+                      ) 
+                    })}
+                    
                   </div>
                 </div>
 
