@@ -1,10 +1,10 @@
-import { useState } from "react";
+
 import {ReceiptIndianRupee,LayoutDashboard,ShoppingCart,PackageOpen, Users,FileText,ChartColumn,Bell,Settings,Menu,LogOut} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 
-const Sidebar = () => {
-    const [extended, setExtended] = useState(false);
+const Sidebar = ({ extended, setExtended }) => {
+    
 
     const menuBtnClicked=()=>{
         
