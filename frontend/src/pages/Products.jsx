@@ -17,7 +17,7 @@ import {
     TrendingUp,
     TrendingDown,
     ChevronDown,
-    Check,Dot
+    Check,Dot,RefreshCcw
 } from "lucide-react";
 import "./Products.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -27,14 +27,12 @@ const Products = () => {
     const [extended, setExtended] = useState(false);
     const [search,setSearch]=useState("");
     const [selectedCategory, setSelectedCategory] = useState("All categories");
-    const [selectedStock, setSelectedStock] = useState("All stock");
+    const [selectedStock, setSelectedStock] = useState("All Stock");
     const [categoryOpen, setCategoryOpen] = useState(false);
     const [stockOpen, setStockOpen] = useState(false);
     const dispatch=useDispatch();
-    const { products, loading, error } = useSelector((state) => state.product);
+    const { products, loading, error,categories,selectedProduct } = useSelector((state) => state.product);
     
-    
-    useEffect(() => {
     const fetchProducts = async () => {
         try {
             dispatch(setProductLoading());
@@ -58,18 +56,30 @@ const Products = () => {
             dispatch(setProductError(err.message));
         }
     };
+    const fetchCategories = async () => {
+        try {
+            
 
-    fetchProducts();
-}, []);
-    
-    const filteredProducts=products.filter((product)=>{
-      const searchText=search.trim().toLowerCase();
-      return(
-        product.name.toLowerCase().includes(searchText)||
-        product.productCode.toLowerCase().includes(searchText)||
-        product.hsnCode.toLowerCase().includes(searchText)
-      );
-    })
+            const res = await fetch(
+                "http://localhost:4000/api/v1/category/getAllCategories",
+                {
+                    credentials: "include",
+                }
+            );
+            const data = await res.json();
+            if (!data.success) {
+                dispatch(setProductError(data.message));
+                return;
+            }
+            dispatch(setCategories(data.categories));
+        } catch (err) {
+            dispatch(setProductError(err.message));
+        }
+    };
+    useEffect(() => {
+        fetchProducts();
+        fetchCategories();
+    },[]);
 
     const getProductStatus=(quantity)=>{
       if(quantity==0){
@@ -94,6 +104,45 @@ const Products = () => {
         }
       }
     }
+
+    let today=new Date();
+    today.setHours(0,0,0,0);
+    const expirySoonProducts=products.filter((product)=>{
+        if (!product.expiry) return false;
+        
+        
+        const target=new Date(product.expiry);
+        target.setHours(0,0,0,0);
+
+        const diffMs=target.getTime() - today.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        return diffDays >= 0 && diffDays <= 120;
+      })
+      
+    
+    
+    const filteredProducts = products.filter((product) => {
+      const searchText = search.trim().toLowerCase();
+
+      const matchesSearch =
+        search.trim() === "" ||
+        (product.name || "").toLowerCase().includes(searchText) ||
+        (product.productCode || "").toLowerCase().includes(searchText) ||
+        (product.hsnCode || "").toLowerCase().includes(searchText);
+
+      const matchesCategory =
+        selectedCategory === "All categories" ||
+        product.categoryId?.name === selectedCategory;
+
+        const status=getProductStatus(product.quantity)
+      const matchesStock=
+        selectedStock=== "All Stock" ||
+        status.label===selectedStock
+    return matchesSearch && matchesCategory && matchesStock ;
+   });
+
+    
 
     const inStock=products.filter((product)=>{
       return getProductStatus(product.quantity).label==="In Stock"
@@ -124,44 +173,91 @@ const Products = () => {
     </div>
 
     <div className="custom-dropdown">
-        <button className="dropdown-trigger">
-            All categories
+      
+        <button className="dropdown-trigger" onClick={()=>setCategoryOpen(!categoryOpen)}>
+          {selectedCategory}
             <ChevronDown size={18} />
         </button>
 
-        {/*
+       { categoryOpen &&(
         <div className="dropdown-menu">
-            <div className="dropdown-option active">
-                All categories
-                <Check size={18} />
-            </div>
-            <div className="dropdown-option">Personal Care</div>
-            <div className="dropdown-option selected">Dairy</div>
-            <div className="dropdown-option">Groceries</div>
-            <div className="dropdown-option">Electronics</div>
-            <div className="dropdown-option">Household</div>
+             
+                <div className="dropdown-option" onClick={() => {setSelectedCategory("All categories");setCategoryOpen(false)}}>
+                  All categories
+                  {selectedCategory==="All categories" && <Check size={17} />}
+                </div>
+
+                {categories.map((category)=>(
+                  <div className="dropdown-option" key={category._id} onClick={() => {setSelectedCategory(category.name);setCategoryOpen(false)}}>
+                     {category.name}
+                  {selectedCategory===category.name && <Check size={17} />}
+                  </div>
+                ))}
+            
+            
         </div>
-        */}
+      )}
+       
     </div>
+    
 
     <div className="custom-dropdown">
-        <button className="dropdown-trigger">
-            All stock
-            <ChevronDown size={18} />
-        </button>
+    <button
+        className="dropdown-trigger"
+        onClick={() => setStockOpen(!stockOpen)}
+    >
+        {selectedStock}
+        <ChevronDown size={18} />
+    </button>
 
-        {/*
+    {stockOpen && (
         <div className="dropdown-menu">
-            <div className="dropdown-option active">
-                All stock
-                <Check size={18} />
+            <div
+                className="dropdown-option"
+                onClick={() => {
+                    setSelectedStock("All Stock");
+                    setStockOpen(false);
+                }}
+            >
+                All Stock
+                {selectedStock === "All Stock" && <Check size={17} />}
             </div>
-            <div className="dropdown-option">In Stock</div>
-            <div className="dropdown-option selected">Low Stock</div>
-            <div className="dropdown-option">Out of Stock</div>
+
+            <div
+                className="dropdown-option"
+                onClick={() => {
+                    setSelectedStock("In Stock");
+                    setStockOpen(false);
+                }}
+            >
+                In Stock
+                {selectedStock === "In Stock" && <Check size={17} />}
+            </div>
+
+            <div
+                className="dropdown-option"
+                onClick={() => {
+                    setSelectedStock("Low Stock");
+                    setStockOpen(false);
+                }}
+            >
+                Low Stock
+                {selectedStock === "Low Stock" && <Check size={17} />}
+            </div>
+
+            <div
+                className="dropdown-option"
+                onClick={() => {
+                    setSelectedStock("Out of Stock");
+                    setStockOpen(false);
+                }}
+            >
+                Out of Stock
+                {selectedStock === "Out of Stock" && <Check size={17} />}
+            </div>
         </div>
-        */}
-    </div>
+    )}
+</div>
 
     <button className="add-product-btn">
         <Plus size={20} />
@@ -288,7 +384,7 @@ const Products = () => {
                       </td>
                       <td>
                         <div className="action-icons">
-                          <Eye size={17} />
+                          <Eye size={17} onClick={()=>dispatch(setSelectedProduct(product))}/>
                           <Pencil size={17} />
                           <RefreshCw size={17} />
                           <Trash2 size={17} />
@@ -328,7 +424,7 @@ const Products = () => {
                     <div className="alert-item" key={product._id}>
                       <div>
                         <h5>{product.name}</h5>
-                        <p>{product.quantity} {product.unit} {product.unitType} left</p>
+                        <p>{product.unit} {product.unitType}   ·   {product.quantity} left</p>
                       </div>
                       <div className="alert-actions">
                         <button>Edit</button>
@@ -338,17 +434,7 @@ const Products = () => {
                     )
                    })}
 
-                    {/* <div className="alert-item">
-                      <div>
-                        <h5>Surf Excel Matic Liquid</h5>
-                        <p>9 2 L left · SE-MTC-2L</p>
-                      </div>
-                      <div className="alert-actions">
-                        <button>Edit</button>
-                        <button>Restock</button>
-                      </div>
-                    </div> */}
-
+                   
                     
                   </div>
                 </div>
@@ -373,7 +459,7 @@ const Products = () => {
                         <div className="alert-item">
                       <div>
                         <h5>{product.name}</h5>
-                        <p>0 {product.quantity} {product.unitType} left</p>
+                        <p>{product.unit} {product.unitType}</p>
                       </div>
                       <div className="alert-actions">
                         <button>Edit</button>
@@ -398,42 +484,34 @@ const Products = () => {
                         <p>Within next 120 days</p>
                       </div>
                     </div>
-                    <h2>3</h2>
+                    <h2>{expirySoonProducts.length}</h2>
                   </div>
 
                   <div className="alert-list">
-                    <div className="alert-item">
-                      <div>
-                        <h5>Himalaya Neem Face Wash</h5>
-                        <p>84 100 ml left · HM-NFW-100</p>
-                      </div>
-                      <div className="alert-actions">
-                        <button>Edit</button>
-                        <button>Restock</button>
-                      </div>
-                    </div>
+                    {expirySoonProducts.map((product)=>{
 
-                    <div className="alert-item">
+                      return(
+                      <>
+                      <div className="alert-item">
                       <div>
-                        <h5>Maggi 2-Minute Noodles</h5>
-                        <p>420 70 g left · MG-2MN-70</p>
+                        <h5>{product.name}</h5>
+                        <p>{product.quantity} left · {product.productCode}</p>
+                        <p className="product-expiry-date">Expires on{" "}
+                        {new Date(product.expiry).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                        })} </p>
                       </div>
                       <div className="alert-actions">
                         <button>Edit</button>
                         <button>Restock</button>
                       </div>
                     </div>
+                      </>
+                    
+                    )})}
 
-                    <div className="alert-item">
-                      <div>
-                        <h5>Parle-G Original Biscuits</h5>
-                        <p>6 800 g left · PG-ORG-800</p>
-                      </div>
-                      <div className="alert-actions">
-                        <button>Edit</button>
-                        <button>Restock</button>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -535,9 +613,128 @@ const Products = () => {
                 </div>
               </div>
             </div>
+            
           </div>
         </div>
+       {selectedProduct && (
+        <div className="product-drawer-overlay">
+          <div className="product-drawer">
+            <button className="drawer-close-btn" onClick={() => dispatch(clearSelectedProduct())}>×</button>
+            <div className="drawer-product-header">
+              <span className="product-avatar">
+                  {selectedProduct.name?.split(" ").map((word) => word[0]).slice(0, 2).join("").toUpperCase()}
+              </span>
+              <div>
+                  <h3>{selectedProduct.name}</h3>
+                  <p>
+                    {selectedProduct.manufacturer || "No manufacturer"} ·{" "}
+                    {selectedProduct.productCode}
+                  </p>
+              </div>
+
+            </div>
+            <p className="drawer-section-title">BASIC INFORMATION</p>
+              <div className="drawer-card">
+                <div>
+                  <small>Product name</small>
+                  <strong>{selectedProduct.name}</strong>
+                </div>
+                <div>
+                  <small>Product code</small>
+                  <strong>{selectedProduct.productCode}</strong>
+                </div>
+                <div>
+                  <small>Category</small>
+                  <strong>{selectedProduct.categoryId?.name || "Uncategorized"}</strong>
+                </div>
+                <div>
+                  <small>Subcategory</small>
+                  <strong>{selectedProduct.subCategory || "-"}</strong>
+                </div>
+                <div>
+                  <small>Manufacturer</small>
+                  <strong>{selectedProduct.manufacturer || "-"}</strong>
+                </div>
+                <div>
+                  <small>Description</small>
+                  <strong>{selectedProduct.description || "-"}</strong>
+                </div>
+              </div>
+
+              <p className="drawer-section-title">PRICING</p>
+
+              <div className="drawer-card two-col">
+                <div>
+                    <small>Purchase price</small>
+                    <strong>₹{selectedProduct.purchasePrice}</strong>
+                </div>
+                <div>
+                    <small>Selling price</small>
+                    <strong>₹{selectedProduct.sellingPrice}</strong>
+                </div>
+                <div>
+                    <small>Profit per unit</small>
+                    <strong className="profit-text">
+                        ₹{selectedProduct.sellingPrice - selectedProduct.purchasePrice}
+                    </strong>
+                </div>
+              </div>
+
+            <p className="drawer-section-title">TAX INFORMATION</p>
+
+              <div className="drawer-card two-col">
+                <div>
+                    <small>HSN code</small>
+                    <strong>{selectedProduct.hsnCode || "-"}</strong>
+                </div>
+                <div>
+                    <small>GST rate</small>
+                    <strong>{selectedProduct.gstRate}%</strong>
+                </div>
+              </div>
+
+              <p className="drawer-section-title">INVENTORY</p>
+
+                <div className="drawer-card two-col">
+                  <div>
+                    <small>Current quantity</small>
+                    <strong>
+                      {selectedProduct.quantity} 
+                    </strong>
+                  </div>
+                  <div>
+                    <small>Unit size</small>
+                    <strong>
+                        {selectedProduct.unit} {selectedProduct.unitType}
+                    </strong>
+                  </div>
+                  <div>
+                    <small>Expiry date</small>
+                    <strong>
+                        {selectedProduct.expiry
+                            ? new Date(selectedProduct.expiry).toLocaleDateString("en-IN", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                              })
+                            : "-"}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="drawer-actions">
+                  <button className="drawer-restock-btn" ><RefreshCcw size={17}/>Restock</button>
+                  <button className="drawer-edit-btn">Edit product</button>
+              </div>
+      
+            
+
+          </div>
+        </div>
+       )}
+
       </div>
+    
     );
 };
 
