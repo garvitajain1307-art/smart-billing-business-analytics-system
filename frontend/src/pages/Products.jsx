@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
+import { NavLink } from "react-router-dom";
 import {
     Search,
     Plus,
@@ -257,12 +258,15 @@ const Products = () => {
             </div>
         </div>
     )}
-</div>
+  </div>
+     <NavLink to="/add-product" >
+        <button className="add-product-btn">
+           <Plus size={20} />
+           Add Product
+        </button>
+    </NavLink>
 
-    <button className="add-product-btn">
-        <Plus size={20} />
-        Add Product
-    </button>
+    
 </div>
 
           <div className="inventory-area">

@@ -55,7 +55,7 @@ const productSchema=mongoose.Schema({
     },
     unitType:{
         type:String,
-        enum:["l","ml","kg","g","pcs"],
+        enum:["lit","ml","kg","gm","pcs"],
         required:true
 
     },

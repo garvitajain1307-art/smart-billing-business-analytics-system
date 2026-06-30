@@ -92,9 +92,12 @@ const productSlice=createSlice({
         clearSelectedProduct: (state) => {
             state.selectedProduct = null;
         },
+        stopProductLoading: (state) => {
+            state.loading = false;
+        }
         
     }
 })
 
-export const {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct}=productSlice.actions;
+export const {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading}=productSlice.actions;
 export default productSlice.reducer;
