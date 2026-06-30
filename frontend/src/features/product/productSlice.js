@@ -9,7 +9,8 @@ const productSlice=createSlice({
         selectedProduct:null,
         loading:false,
         error:null,
-        success:false
+        success:false,
+        categoryError:null
     },
     reducers:{
         setProductLoading:(state)=>{
@@ -81,8 +82,16 @@ const productSlice=createSlice({
             state.loading = false;
             state.success=false;
         },
+        setCategoryError:(state,action)=>{
+            state.categoryError=action.payload;
+            state.loading = false;
+            state.success=false;
+        },
         clearProductError:(state)=>{
             state.error=null;
+        },
+        clearCategoryError:(state)=>{
+            state.categoryError=null;
         },
         
         clearProductSuccess: (state) => {
@@ -99,5 +108,5 @@ const productSlice=createSlice({
     }
 })
 
-export const {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading}=productSlice.actions;
+export const {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading,setCategoryError,clearCategoryError}=productSlice.actions;
 export default productSlice.reducer;

@@ -49,7 +49,7 @@ const CompanySetup = () => {
                 }
         
                 dispatch(setCompany(data.company));
-                dispatch(setAdmin(data.admin));
+                
                 dispatch(clearCompanyError());
         
                 setCompanyData({
@@ -62,7 +62,8 @@ const CompanySetup = () => {
                 });
         
                 
-                navigate("/company/setup/success");
+                navigate("/company/setup/success", {replace: true,state: { fromSetup: true },});
+                dispatch(setAdmin(data.admin));
                 
         
             } catch (error) {

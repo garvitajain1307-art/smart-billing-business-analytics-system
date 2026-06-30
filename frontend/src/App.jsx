@@ -53,8 +53,11 @@ function App() {
     <BrowserRouter>
     <Routes>
       <Route path="/" element={isAuthenticated ? (admin?.companyId ? <Navigate to="/dashboard"/> : <Navigate to="/company/setup"/>) : <AuthPage/>}/>
-      <Route path="/company/setup" element={!isAuthenticated ? <Navigate to="/"/> : admin?.companyId ? <Navigate to="/dashboard"/> : <CompanySetup/>}/>
-      <Route path="/company/setup/success" element={!isAuthenticated ? <Navigate to="/"/> : <CompanySetupSuccess/>}/>
+      <Route
+  path="/company/setup"
+  element={!isAuthenticated ? <Navigate to="/" /> : <CompanySetup />}
+/>
+      <Route path="/company/setup/success" element={!isAuthenticated ? <Navigate to="/" /> : <CompanySetupSuccess />}/>
       <Route path="/dashboard" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Dashboard/>}/> 
       <Route path="/billing" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Billing/>}/>
  

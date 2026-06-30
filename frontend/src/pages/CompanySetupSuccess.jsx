@@ -2,13 +2,19 @@
 import { ReceiptText, CircleCheckBig,ChevronRight } from "lucide-react";
 
 
-import {useNavigate} from "react-router-dom"
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import "./CompanySetupSuccess.css";
 
 const CompanySetupSuccess = () => {
+
     const navigate=useNavigate();
+    const location = useLocation();
+
+    if (!location.state?.fromSetup) {
+        return <Navigate to="/dashboard" replace />;
+    }
     const btnClicked=()=>{
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
         
     }
     

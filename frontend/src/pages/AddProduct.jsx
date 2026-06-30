@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import "./AddProduct.css";
 import { useDispatch, useSelector } from "react-redux";
-import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading} from "../features/product/productSlice"
+import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading,setCategoryError,clearCategoryError} from "../features/product/productSlice"
 
 const AddProduct = () => {
   const [extended, setExtended] = useState(false);
@@ -29,9 +29,14 @@ const AddProduct = () => {
   const [hsnSuggestions, setHsnSuggestions]=useState([]);
   const [hsnDescription,setHsnDescription]=useState("");
   const [hsnOpen, setHsnOpen] = useState(false);
+  const [categoryModalOpen,setCategoryModalOpen]=useState(false);
+  const [categoryModalData,setCategoryModalData]=useState({
+    name:"",
+    description:""
+  });
   const dispatch=useDispatch();
   const navigate=useNavigate();
-  const { products, loading, error,categories,selectedProduct } = useSelector((state) => state.product);
+  const { products, loading, error,categories,selectedProduct,categoryError } = useSelector((state) => state.product);
   const [addProductData, setAddProductData] = useState({
         name: "",
         productCode: "",
@@ -113,6 +118,10 @@ const AddProduct = () => {
     const handleChange = (e) => {
             dispatch(clearProductError());
             setAddProductData({ ...addProductData, [e.target.name]: e.target.value });
+    };
+    const handleModalChange = (e) => {
+            dispatch(clearCategoryError());
+            setCategoryModalData({ ...categoryModalData, [e.target.name]: e.target.value });
     };
 
   const handleSubmit = async(e) => {
@@ -226,6 +235,82 @@ const AddProduct = () => {
         } catch (error) {
             console.log(error);
     dispatch(setProductError(error.message));
+        } finally{
+          dispatch(stopProductLoading());
+
+        }
+  };
+
+  const handleModalSubmit = async(e) => {
+    e.preventDefault();
+    if (!categoryModalData.name.trim()) {
+        dispatch(setCategoryError("Category name is required"));
+        return;
+    }
+
+    if (!categoryModalData.description.trim()) {
+      dispatch(setCategoryError("Category Description is required"));
+      return;
+    }
+
+    
+    
+        try {
+          
+            dispatch(setProductLoading());
+    
+            const res = await fetch("http://localhost:4000/api/v1/category/addCategory", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify(categoryModalData),
+            });
+    
+            let data = {};
+
+            try {
+              data = await res.json();
+              console.log("ADD CATEGORY RESPONSE:", data);
+            } catch (err) {
+                data = {};
+            }
+    
+            if (!res.ok || !data.success) {
+              dispatch(
+              setCategoryError(
+                    data.message ||
+                  data.error ||
+                    data.errors?.[0]?.message ||
+                 data.errors?.[0] ||
+                  "Failed to add category"
+                )
+              );
+             return;
+          }
+
+
+          const newCategory=data.category
+          dispatch(addCategory(newCategory));
+          setSelectedCategory(newCategory);
+          setAddProductData((prev) => ({
+            ...prev,
+            categoryId: newCategory._id,
+          }));
+          dispatch(clearCategoryError());
+
+          setCategoryModalData({
+            name: "",
+            description:""
+          });
+          setCategoryModalOpen(false);
+          setCategoryOpen(false);
+            
+          
+        } catch (error) {
+            console.log(error);
+    dispatch(setCategoryError(error.message));
         } finally{
           dispatch(stopProductLoading());
 
@@ -391,11 +476,17 @@ const AddProduct = () => {
                               )}
                             </div>
                           ))}
-                          <div className="dropdown-option add-category-option">
-                            <Plus size={20} />
-                            <span>Add Category</span>
-                            
-                          </div>
+                          
+                            <button type="button" className="dropdown-option add-category-option"
+                               onClick={()=>{
+                                setCategoryModalOpen(true);
+                                setCategoryOpen(false);
+                               }}
+                            >
+                              <Plus size={20} />
+                              <span>Add Category</span>
+                            </button>
+
                         </div>
                       )}
                     </div>
@@ -734,6 +825,83 @@ const AddProduct = () => {
             </aside>
           </div>
         </form>
+        {categoryModalOpen && (
+
+         
+          <div className="category-modal-overlay">
+           <form onSubmit={handleModalSubmit}>
+            <div className="category-modal">
+
+              <div className="category-modal-header">
+                <div>
+                  <p>CATEGORY</p>
+                  <h2>Add New Category</h2>
+                  <span>Create a new category for organizing your inventory.</span>
+                </div>
+
+                                      
+                <button type="button" className="category-modal-close"
+                  onClick={() => {
+                  setCategoryModalOpen(false);
+                  clearCategoryError();
+                  setCategoryModalData((prev) => ({
+                  ...prev,
+                  name: "",
+                  description: "",
+                  }));
+                }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {categoryError && (
+            <div className="sticky-error">
+                {categoryError}
+            </div>
+          )}
+
+             
+              <div className="category-modal-body">
+
+                <div className="category-field">
+                    <label>Category Name *</label>
+                        <input type="text" name="name" placeholder="e.g. Dairy Products" value={categoryModalData.name} onChange={handleModalChange}/>
+                </div>
+
+                <div className="category-field">
+                     <label>Description</label>
+                       <textarea rows="4" name="description" placeholder="Short description for this category..." value={categoryModalData.description} onChange={handleModalChange}></textarea>
+                </div>
+
+               </div>
+
+              <div className="category-modal-footer">
+
+                <button className="category-cancel-btn"
+                  onClick={() => {
+                  clearCategoryError()
+                  setCategoryModalData({
+                  
+                  name: "",
+                  description: "",
+                  });
+                }}
+                >
+                    Cancel
+                </button>
+
+                <button className="category-save-btn" type="submit">
+                      <Plus size={18} />
+                      Add Category
+                </button>
+
+              </div>
+
+            </div>
+          </form> 
+        </div>
+        )}
       </main>
     </div>
   );
