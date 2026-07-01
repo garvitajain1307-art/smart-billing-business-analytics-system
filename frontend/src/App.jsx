@@ -16,6 +16,7 @@ import Notifications from './pages/Notifications';
 import Products from './pages/Products';
 import Settings from './pages/Settings';
 import AddProduct from './pages/AddProduct';
+import EditProduct from './pages/EditProduct';
 
 
 
@@ -67,7 +68,8 @@ function App() {
       <Route path="/analytics" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Analytics/>}/>
       <Route path="/notifications" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Notifications/>}/>
       <Route path="/settings" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Settings/>}/>
-      <Route path="/add-product" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <AddProduct/>}/>
+      <Route path="/products/add-product" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <AddProduct/>}/>
+        <Route path="/products/edit-product/:productId" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <EditProduct/>}/>
     </Routes>
     
     </BrowserRouter>

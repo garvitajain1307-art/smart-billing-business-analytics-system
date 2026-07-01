@@ -10,7 +10,8 @@ const productSlice=createSlice({
         loading:false,
         error:null,
         success:false,
-        categoryError:null
+        categoryError:null,
+        restockError:null,
     },
     reducers:{
         setProductLoading:(state)=>{
@@ -87,13 +88,20 @@ const productSlice=createSlice({
             state.loading = false;
             state.success=false;
         },
+        setRestockError:(state,action)=>{
+            state.restockError=action.payload;
+            state.loading = false;
+            state.success=false;
+        },
         clearProductError:(state)=>{
             state.error=null;
         },
         clearCategoryError:(state)=>{
             state.categoryError=null;
         },
-        
+        clearRestockError:(state)=>{
+            state.restockError=null;
+        },
         clearProductSuccess: (state) => {
             state.success = false;
         },
@@ -108,5 +116,5 @@ const productSlice=createSlice({
     }
 })
 
-export const {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading,setCategoryError,clearCategoryError}=productSlice.actions;
+export const {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading,setCategoryError,clearCategoryError,setRestockError,clearRestockError}=productSlice.actions;
 export default productSlice.reducer;

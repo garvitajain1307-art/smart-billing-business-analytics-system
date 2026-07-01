@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
-import { NavLink } from "react-router-dom";
+import { NavLink,Navigate, useNavigate } from "react-router-dom";
 import {
     Search,
     Plus,
@@ -18,11 +18,12 @@ import {
     TrendingUp,
     TrendingDown,
     ChevronDown,
-    Check,Dot,RefreshCcw
+    Check,Dot,RefreshCcw,
+    X
 } from "lucide-react";
 import "./Products.css";
 import { useDispatch, useSelector } from "react-redux";
-import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct} from "../features/product/productSlice"
+import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,setRestockError,clearRestockError,stopProductLoading} from "../features/product/productSlice"
 
 const Products = () => {
     const [extended, setExtended] = useState(false);
@@ -31,9 +32,15 @@ const Products = () => {
     const [selectedStock, setSelectedStock] = useState("All Stock");
     const [categoryOpen, setCategoryOpen] = useState(false);
     const [stockOpen, setStockOpen] = useState(false);
+    const [restockModalOpen, setRestockModalOpen] = useState(false);
+    const [restockModalData,setRestockModalData]=useState({
+        quantity: "",
+        productId: "",
+        currentQuantity: "",
+    });
     const dispatch=useDispatch();
-    const { products, loading, error,categories,selectedProduct } = useSelector((state) => state.product);
-    
+    const { products, loading, error,categories,selectedProduct,restockError } = useSelector((state) => state.product);
+    const navigate=useNavigate();
     const fetchProducts = async () => {
         try {
             dispatch(setProductLoading());
@@ -120,6 +127,102 @@ const Products = () => {
 
         return diffDays >= 0 && diffDays <= 120;
       })
+
+      const handleRestockModalChange = (e) => {
+                dispatch(clearRestockError());
+                setRestockModalData({ ...restockModalData, [e.target.name]: e.target.value });
+      };
+      const handleRestockModalSubmit = async(e) => {
+          e.preventDefault();
+          if (!restockModalData.quantity) {
+              dispatch(setRestockError("Restock quantity is required"));
+              return;
+          }
+            try {
+                
+                dispatch(setProductLoading());
+          
+                  const res = await fetch(`http://localhost:4000/api/v1/products/restockProduct/${restockModalData.productId}`, {
+                      method: "PUT",
+                      headers: {
+                          "Content-Type": "application/json"
+                      },
+                      credentials: "include",
+                      body: JSON.stringify({quantity: restockModalData.quantity}),
+                  });
+          
+                  let data = {};
+      
+                  try {
+                    data = await res.json();
+                    
+                  } catch (err) {
+                      data = {};
+                  }
+          
+                  if (!res.ok || !data.success) {
+                    dispatch(
+                    setRestockError(
+                          data.message ||
+                        data.error ||
+                          data.errors?.[0]?.message ||
+                       data.errors?.[0] ||
+                        "Failed to restock product"
+                      )
+                    );
+                   return;
+                }
+      
+      
+                
+                dispatch(updateProduct(data.product));
+                
+                
+                dispatch(clearRestockError());
+      
+                setRestockModalData({
+                  quantity:"",
+                   productId: "",
+                   currentQuantity: "",
+                });
+                setRestockModalOpen(false);
+                
+                  
+                
+              } catch (error) {
+                  console.log(error);
+          dispatch(setRestockError(error.message));
+              } finally{
+                dispatch(stopProductLoading());
+      
+              }
+        };
+      
+      const handleDeleteProduct = async (productId) => {
+        if (!window.confirm("Delete this product?")) return;
+        try {
+            
+
+            const res = await fetch(
+                `http://localhost:4000/api/v1/products/deleteProduct/${productId}`,
+                {
+                  method: "DELETE",
+                  credentials: "include",
+                }
+            );
+            const data = await res.json();
+            if (!data.success) {
+                dispatch(setProductError(data.message));
+                return;
+            }
+            dispatch(deleteProduct(productId));
+            // dispatch(clearProductError());
+        } catch (err) {
+            dispatch(setProductError(err.message));
+        }
+    };
+
+      
       
     
     
@@ -259,7 +362,7 @@ const Products = () => {
         </div>
     )}
   </div>
-     <NavLink to="/add-product" >
+     <NavLink to="/products/add-product" >
         <button className="add-product-btn">
            <Plus size={20} />
            Add Product
@@ -389,9 +492,9 @@ const Products = () => {
                       <td>
                         <div className="action-icons">
                           <Eye size={17} onClick={()=>dispatch(setSelectedProduct(product))}/>
-                          <Pencil size={17} />
+                          <Pencil size={17} onClick={()=>navigate(`/products/edit-product/${product._id}`)}/>
                           <RefreshCw size={17} />
-                          <Trash2 size={17} />
+                          <Trash2 size={17} onClick={() => handleDeleteProduct(product._id)} />
                         </div>
                       </td>
                     </tr>
@@ -431,8 +534,14 @@ const Products = () => {
                         <p>{product.unit} {product.unitType}   ·   {product.quantity} left</p>
                       </div>
                       <div className="alert-actions">
-                        <button>Edit</button>
-                        <button>Restock</button>
+                        <button onClick={()=>navigate(`/products/edit-product/${product._id}`)}>Edit</button>
+                        <button onClick={() => {
+                          setRestockModalData({
+                          quantity: "",
+                          productId: product._id,
+                          currentQuantity: product.quantity,
+                        });
+                        setRestockModalOpen(true)}}>Restock</button>
                       </div>
                     </div>
                     )
@@ -466,8 +575,14 @@ const Products = () => {
                         <p>{product.unit} {product.unitType}</p>
                       </div>
                       <div className="alert-actions">
-                        <button>Edit</button>
-                        <button>Restock</button>
+                        <button onClick={()=>navigate(`/products/edit-product/${product._id}`)}>Edit</button>
+                        <button onClick={() => {
+                          setRestockModalData({
+                          quantity: "",
+                          productId: product._id,
+                          currentQuantity: product.quantity,
+                        });
+                        setRestockModalOpen(true)}}>Restock</button>
                       </div>
                     </div>
                         
@@ -508,8 +623,15 @@ const Products = () => {
                         })} </p>
                       </div>
                       <div className="alert-actions">
-                        <button>Edit</button>
-                        <button>Restock</button>
+                        <button onClick={()=>navigate(`/products/edit-product/${product._id}`)}>Edit</button>
+                        <button 
+                        onClick={() => {
+                          setRestockModalData({
+                          quantity: "",
+                          productId: product._id,
+                          currentQuantity: product.quantity,
+                        });
+                        setRestockModalOpen(true)}}>Restock</button>
                       </div>
                     </div>
                       </>
@@ -727,15 +849,102 @@ const Products = () => {
                 </div>
 
                 <div className="drawer-actions">
-                  <button className="drawer-restock-btn" ><RefreshCcw size={17}/>Restock</button>
-                  <button className="drawer-edit-btn">Edit product</button>
-              </div>
-      
-            
+                  <button className="drawer-restock-btn"  onClick={() => {
+                          setRestockModalData({
+                          quantity: "",
+                          productId: selectedProduct._id,
+                          currentQuantity: selectedProduct.quantity,
+                        });
+                        setRestockModalOpen(true)}}><RefreshCcw size={17}/>Restock</button>
+                  <button className="drawer-edit-btn" onClick={()=>navigate(`/products/edit-product/${selectedProduct._id}`)}>
+                    Edit product
+                  </button>
+                </div>
 
           </div>
         </div>
        )}
+
+
+       {restockModalOpen && (
+       
+                
+                 <div className="restock-modal-overlay">
+                  <form onSubmit={handleRestockModalSubmit}>
+                   <div className="restock-modal">
+       
+                     <div className="category-modal-header">
+                       <div>
+                         <p>RESTOCK</p>
+                         <h2>Restock Product</h2>
+                         <span>Update the quantity of this product in your inventory.</span>
+                       </div>
+       
+                                             
+                       <button type="button" className="restock-modal-close"
+                         onClick={() => {
+                          setRestockModalOpen(false);
+                          dispatch(clearRestockError());
+                          setRestockModalData({
+                              quantity: "",
+                               productId: "",
+                        });
+                       }}
+                       >
+                         <X size={18} />
+                       </button>
+                     </div>
+       
+                     {restockError && (
+                   <div className="sticky-error">
+                       {restockError}
+                   </div>
+                 )}
+       
+                    
+                     <div className="restock-modal-body">
+
+                      <div className="restock-field">
+                           <label>Current Quantity </label>
+                               <input type="number"  value={restockModalData.currentQuantity} disabled/>
+                       </div>
+       
+                       <div className="restock-field">
+                           <label>Increase Quantity By *</label>
+                               <input type="number" name="quantity" placeholder="e.g. 100" value={restockModalData.quantity} onChange={handleRestockModalChange}/>
+                       </div>
+       
+                       
+       
+                      </div>
+       
+                     <div className="restock-modal-footer">
+       
+                       <button className="restock-cancel-btn"
+                       type="button"
+                         onClick={() => {
+                        // setRestockModalOpen(false);
+                          dispatch(clearRestockError());
+                          setRestockModalData({
+                          quantity: "",
+                            productId: "",
+                          });
+                       }}
+                       >
+                           Cancel
+                       </button>
+       
+                       <button className="restock-save-btn" type="submit">
+                             <Plus size={18} />
+                             Restock Product
+                       </button>
+       
+                     </div>
+       
+                   </div>
+                 </form> 
+               </div>
+               )}
 
       </div>
     

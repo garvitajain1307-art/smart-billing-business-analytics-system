@@ -1,0 +1,9 @@
+.left-arrow-back {
+    transition: all 0.2s ease;
+}
+
+.left-arrow-back:hover {
+    cursor: pointer;
+    color: #2563eb;
+    transform: translateX(-3px);
+}

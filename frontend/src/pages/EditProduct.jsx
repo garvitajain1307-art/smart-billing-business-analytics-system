@@ -1,7 +1,7 @@
 
 import Sidebar from "../components/Sidebar";
 import { useEffect, useState } from "react";
-import {useNavigate} from "react-router-dom"
+import {useParams,useNavigate} from "react-router-dom"
 import {
   ArrowLeft,
   X,
@@ -18,11 +18,11 @@ import {
   TrendingUp,
   CalendarDays,ChevronDown,Check,
 } from "lucide-react";
-import "./AddProduct.css";
+import "./EditProduct.css";
 import { useDispatch, useSelector } from "react-redux";
 import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading,setCategoryError,clearCategoryError} from "../features/product/productSlice"
 
-const AddProduct = () => {
+const EditProduct = () => {
   const [extended, setExtended] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -36,6 +36,7 @@ const AddProduct = () => {
   });
   const dispatch=useDispatch();
   const navigate=useNavigate();
+  const {productId}=useParams()
   const { products, loading, error,categories,selectedProduct,categoryError } = useSelector((state) => state.product);
   const [addProductData, setAddProductData] = useState({
         name: "",
@@ -50,9 +51,49 @@ const AddProduct = () => {
         unit: "",
         unitType: "",
         expiry: "",
-        hsnCode: "",
+        hsnCode: "", 
         gstRate: "",
     });
+
+    const fetchProduct=async ()=>{
+        try{
+            const res=await fetch(`http://localhost:4000/api/v1/products/getProduct/${productId}`,
+            {
+                credentials: "include",
+            }
+        )
+         const data = await res.json();
+         
+              if (!data.success) {
+                  dispatch(setProductError(data.message));
+                  return;
+              }
+              const product=data.product;
+              setSelectedCategory(product.categoryId);
+              setHsnDescription(product.hsnId?.description || "");
+              setAddProductData({
+                productCode:product.productCode || "",
+                name: product.name || "",
+                categoryId: product.categoryId?._id || "",
+                subCategory:product.subCategory || "",
+                purchasePrice: product.purchasePrice || "",
+                sellingPrice: product.sellingPrice || "",
+                 quantity: product.quantity || "",
+                unit: product.unit || "",
+                unitType: product.unitType || "",
+                manufacturer: product.manufacturer || "",
+                expiry: product.expiry?.slice(0, 10) || "",
+                hsnCode: product.hsnCode || "",
+                gstRate: product.gstRate || "",
+                description: product.description || "",
+
+              })
+        }
+        catch(err){
+            dispatch(setProductError(err.message));
+
+        }
+    }
 
     const fetchCategories = async () => {
           try {
@@ -112,6 +153,7 @@ const AddProduct = () => {
       }
       
       useEffect(() => {
+          fetchProduct();
           fetchCategories();
       },[]);
 
@@ -169,8 +211,8 @@ const AddProduct = () => {
           
             dispatch(setProductLoading());
     
-            const res = await fetch("http://localhost:4000/api/v1/products/addProduct", {
-                method: "POST",
+            const res = await fetch(`http://localhost:4000/api/v1/products/updateProduct/${productId}`, {
+                method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -200,35 +242,30 @@ const AddProduct = () => {
              return;
           }
 
-
-            
-            
-           
-    
-            
-            dispatch(addProduct(data.product));
+            dispatch(updateProduct(data.product));
             dispatch(clearProductError());
-            setAddProductData({
-                name: "",
-                productCode: "",
-                categoryId: "",
-                subCategory: "",
-                manufacturer: "",
-                description: "",
-                purchasePrice: "",
-                sellingPrice: "",
-                quantity: "",
-                unit: "",
-                unitType: "",
-                expiry: "",
-                hsnCode: "",
-                gstRate: "",
-            });
-            setSelectedCategory(null);
-            setCategoryOpen(false);
-            setHsnSuggestions([]);
-            setHsnDescription("");
-            setHsnOpen(false);
+            // setAddProductData({
+            //     name: "",
+            //     productCode: "",
+            //     categoryId: "",
+            //     subCategory: "",
+            //     manufacturer: "",
+            //     description: "",
+            //     purchasePrice: "",
+            //     sellingPrice: "",
+            //     quantity: "",
+            //     unit: "",
+            //     unitType: "",
+            //     expiry: "",
+            //     hsnCode: "",
+            //     gstRate: "",
+            // });
+            // setSelectedCategory(null);
+            // setCategoryOpen(false);
+            // setHsnSuggestions([]);
+            // setHsnDescription("");
+            // setHsnOpen(false);
+            dispatch(clearSelectedProduct());
             navigate("/products")
             
     
@@ -320,27 +357,7 @@ const AddProduct = () => {
   const cancelBtnClicked=()=>{
     
             dispatch(clearProductError());
-            setAddProductData({
-                name: "",
-                productCode: "",
-                categoryId: "",
-                subCategory: "",
-                manufacturer: "",
-                description: "",
-                purchasePrice: "",
-                sellingPrice: "",
-                quantity: "",
-                unit: "",
-                unitType: "",
-                expiry: "",
-                hsnCode: "",
-                gstRate: "",
-            });
-            setSelectedCategory(null);
-            setCategoryOpen(false);
-            setHsnSuggestions([]);
-          setHsnDescription("");
-          setHsnOpen(false);
+            navigate("/products")
           
   }
 
@@ -368,8 +385,8 @@ const AddProduct = () => {
             <div className="add-product-title">
               <ArrowLeft size={18} onClick={()=>navigate("/products")} className="left-arrow-back"/>
               <div>
-                <p>INVENTORY · NEW ITEM</p>
-                <h1>Add New Product</h1>
+                <p>INVENTORY </p>
+                <h1>Update Product</h1>
                 <span>
                   Create and manage inventory items for billing and stock
                   tracking.
@@ -390,7 +407,7 @@ const AddProduct = () => {
 
               <button type="submit" className="save-product-btn">
                 <Save size={15} />
-                Save Product
+                Update Product
               </button>
             </div>
           </header>
@@ -879,7 +896,6 @@ const AddProduct = () => {
               <div className="category-modal-footer">
 
                 <button className="category-cancel-btn"
-                   type="button"
                   onClick={() => {
                   clearCategoryError()
                   setCategoryModalData({
@@ -908,5 +924,5 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default EditProduct;
 

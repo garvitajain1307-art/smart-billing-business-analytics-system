@@ -151,7 +151,7 @@ export const getProduct=asyncHandler(async(req,res,next)=>{
 
     }
         
-    const product=await Product.findOne({_id:productId,companyId}).populate("categoryId");
+    const product=await Product.findOne({_id:productId,companyId}).populate("categoryId").populate("hsnId");
     if (!product) {
         return next(new ErrorHandler("Product not found", 404));
     }
@@ -289,3 +289,64 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
         product,
     });
 });
+
+export const restockProduct = [
+    check("quantity")
+        .notEmpty()
+        .withMessage("Quantity is required")
+        .isNumeric()
+        .withMessage("Quantity must be a number")
+        .custom((value) => {
+            if (Number(value) <= 0) {
+                throw new Error("Quantity must be greater than 0 for restocking");
+            }
+            return true;
+        }),
+
+    asyncHandler(async (req, res, next) => {
+
+        const companyId = req.admin.companyId;
+
+        if (!companyId) {
+            return next(new ErrorHandler("Please setup your company first", 400));
+        }
+
+        const { quantity } = req.body;
+        const productId = req.params.productId;
+
+        if (!productId) {
+            return next(new ErrorHandler("Please enter a productId first", 400));
+        }
+
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(422).json({
+                success: false,
+                errors: errors.array().map(err => err.msg),
+                oldInput: { quantity }
+            });
+        }
+
+        const product = await Product.findOne({
+            _id: productId,
+            companyId
+        });
+
+        if (!product) {
+            return next(new ErrorHandler("Product not found", 404));
+        }
+
+        const addedQuantity = Number(quantity);
+
+        product.quantity += addedQuantity;
+
+        await product.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Product restocked successfully",
+            product
+        });
+    })
+];

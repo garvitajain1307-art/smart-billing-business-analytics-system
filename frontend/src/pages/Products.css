@@ -1002,3 +1002,129 @@
     
 }
 
+.restock-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.restock-modal {
+    width: 420px;
+    max-width: 100%;
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+    overflow: hidden;
+    animation: modalPop 0.22s ease;
+}
+
+.restock-modal-close {
+    border: none;
+    background: #f1f5f9;
+    color: #64748b;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: 0.2s ease;
+}
+
+.restock-modal-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: rotate(90deg);
+}
+
+.restock-modal-body {
+    padding: 24px;
+}
+
+.restock-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.restock-field label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin-top:7px;
+}
+
+.restock-field input {
+    
+    height: 46px;
+    border: 1px solid #dbe3ef;
+    border-radius: 14px;
+    padding: 0 14px;
+    font-size: 14px;
+    outline: none;
+    
+}
+
+.restock-field input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.restock-modal-footer {
+    padding: 18px 24px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid #eef2f7;
+}
+
+.restock-cancel-btn,
+.restock-save-btn {
+    border: none;
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.restock-cancel-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.restock-cancel-btn:hover {
+    background: #e2e8f0;
+}
+
+.restock-save-btn {
+    background: #16a34a;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.restock-save-btn:hover {
+    background: #15803d;
+    transform: translateY(-1px);
+}
+
+@keyframes modalPop {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
