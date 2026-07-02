@@ -733,7 +733,7 @@ body {
 }
 
 .delete-item:hover{
-    background:#f3f4f6;     /* Light grey instead of red */
+    background:#f3f4f6;    
     color:#b91c1c;
     transform:scale(1.08);
 }
