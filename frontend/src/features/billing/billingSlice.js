@@ -19,17 +19,23 @@ const billingSlice=createSlice({
             state.error=null
         },
         addToCart:(state,action)=>{
+            state.error = null;
             const existingProduct=state.cart.find((product)=>product._id===action.payload._id)
             if(existingProduct){
-                if(existingProduct.CartQuantity<existingProduct.quantity){
-                    existingProduct.CartQuantity+=1;
+                if(existingProduct.cartQuantity<existingProduct.quantity){
+                    existingProduct.cartQuantity+=1;
+                    state.error=null;
+                }else{
+                    state.loading = false;
+                    state.error = "Maximum available stock reached";
                 }
             }
             else{
-                state.cart.push({...action.payload,CartQuantity:1});
+                state.cart.push({...action.payload,cartQuantity:1});
+                state.error=null;
             }
             state.loading = false;
-            state.error = null;
+            
 
         },
         removeFromCart:(state,action)=>{
@@ -42,13 +48,19 @@ const billingSlice=createSlice({
             state.error = null;
         },
         increaseQuantity:(state,action)=>{
+            state.error=null;
             const product=state.cart.find((item)=>item._id===action.payload);
             if(product&& product.cartQuantity < product.quantity){
                 product.cartQuantity += 1;
+                 state.error=null;
             }
+            else{
+                state.loading = false;
+                state.error = "Maximum available stock reached";
+            }
+            
             state.loading = false;
-            state.error = null;
-
+           
         },
         decreaseQuantity:(state,action)=>{
              const product = state.cart.find(
@@ -56,8 +68,14 @@ const billingSlice=createSlice({
             );
 
             if (!product) return;
-
-            if (product.cartQuantity > 1) {
+            if(product.cartQuantity==1){
+                 state.cart = state.cart.filter(
+                        (product) => product._id !== action.payload
+                );
+                state.loading = false;
+                state.error = null;
+            }
+            else if (product.cartQuantity > 1) {
                 product.cartQuantity -= 1;
             } else {
                 state.cart = state.cart.filter(

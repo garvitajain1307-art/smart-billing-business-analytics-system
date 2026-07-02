@@ -706,3 +706,166 @@ body {
     font-weight: 600 !important;
     font-size: 11px  !important;
 }
+
+.bill-items-table {
+    width: 100%;
+}
+
+.bill-table-header,
+.bill-item-row {
+    display: grid;
+    grid-template-columns: 2.2fr .85fr .75fr .55fr .75fr .85fr 34px;
+    align-items: center;
+    gap: 6px;
+}
+
+.delete-item{
+    width:28px;
+    height:28px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:8px;
+
+    color:#ef4444;
+    cursor:pointer;
+    transition:all .2s ease;
+}
+
+.delete-item:hover{
+    background:#f3f4f6;     /* Light grey instead of red */
+    color:#b91c1c;
+    transform:scale(1.08);
+}
+
+.bill-table-header {
+    padding: 10px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.bill-table-header span {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+.bill-item-row {
+    padding: 14px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.bill-product-info h4 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #1e293b;
+}
+
+.bill-product-info p {
+    margin: 3px 0 0;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+
+.bill-qty-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.bill-qty-box div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bill-qty-box button {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top:12px;
+}
+
+.bill-qty-box strong {
+    min-width: 12px;
+    text-align: center;
+    font-size: 13px;
+    margin-top:12px;
+}
+
+.bill-qty-box p {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 600;
+    color: #10b981;
+}
+
+.bill-price,
+.gst-amount,
+.line-total {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.gst-badge {
+    /* display: inline-flex; */
+    /* align-items: center; */
+    justify-content: center;
+    padding: 3px 8px;
+    border-radius: 7px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 11px;
+    font-weight: 700;
+    width: fit-content;
+}
+
+.bill-item-row {
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.bill-item-row:hover {
+    background: #fafbff;
+}
+
+.bill-qty-box button {
+    transition: all 0.2s ease;
+}
+
+.bill-qty-box button:hover {
+    background: #4f46e5;
+    color: #ffffff;
+    transform: scale(1);
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+}
+
+.bill-qty-box button:active {
+    transform: scale(0.96);
+    box-shadow: none;
+}
+
+.bill-item-row:hover .bill-product-info h4 {
+    color: #4f46e5;
+    transition: color 0.2s ease;
+}
+
+.gst-badge {
+    transition: all 0.2s ease;
+}
+
+.bill-item-row:hover {
+    background: #e5e7eb;
+    
+}
