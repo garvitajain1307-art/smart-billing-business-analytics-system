@@ -29,6 +29,9 @@ const Billing = () => {
     const [search,setSearch]=useState("")
     const [selectedCategory, setSelectedCategory] = useState("All categories");
     const [selectedStock, setSelectedStock] = useState("All Stock");
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [customerSuggestions, setCustomerSuggestions]=useState([]);
+    const [customerOpen, setCustomerOpen] = useState(false);
     const [categoryOpen, setCategoryOpen] = useState(false);
     const { products,categories,selectedProduct} = useSelector((state) => state.product);
     const {cart,customer,paymentMethod,discount,loading,error}=useSelector((state) => state.billing);
@@ -144,6 +147,42 @@ const Billing = () => {
         }
       }
     }
+    const fetchCustomerSuggestions=async (value)=>{
+        try{
+          if(!value.trim()){
+            setCustomerSuggestions([]);
+            
+            setCustomerOpen(false);
+            
+            // setAddProductData(prev => ({
+            //   ...prev,
+            //   hsnCode: "",
+            //   gstRate: "",
+            // }));
+            return;
+          }
+
+          const res = await fetch(
+            
+            `http://localhost:4000/api/v1/customer/searchCustomer?query=${value}`,
+            {
+              credentials: "include",
+            }
+         );
+         const data = await res.json();
+          if (!data.success) {
+              dispatch(setBillingError(data.message||"Failed to search Customer"));
+                return;
+          }
+          setCustomerSuggestions(data.customerList || []);
+          setCustomerOpen((data.customerList || []).length > 0);
+          
+
+        }catch(err){
+          dispatch(setBillingError("Failed to fetch customer suggestions"));
+
+        }
+      }
 
    const inStock=products.filter((product)=>{
       return getProductStatus(product.quantity).label==="In Stock"
@@ -160,6 +199,12 @@ const Billing = () => {
     });
     const lowStockTotal=lowStock.length;
 
+    const today=new Date().toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+    });
+
   return (
     <div className="billing-layout">
       <Sidebar extended={extended} setExtended={setExtended} />
@@ -168,9 +213,11 @@ const Billing = () => {
         className={`billing-main ${extended ? "sidebar-open" : "sidebar-closed"}`}
       >
         <header className="billing-header">
-          <div>
+          <div className="invoice-details">
             <h2>Billing / POS</h2>
-            <p>21 Jun 2026 · INV-2024-0285</p>
+            <p>
+              {today} <span className="separator">·</span> INV-2024-0285
+            </p>
           </div>
 
           <div className="billing-header-actions">
@@ -289,7 +336,11 @@ const Billing = () => {
                           </p>
                         </div>
 
-                        <button type="button" disabled={product.quantity === 0} onClick={()=>dispatch(addToCart(product))}>
+                        <button
+                          type="button"
+                          disabled={product.quantity === 0}
+                          onClick={() => dispatch(addToCart(product))}
+                        >
                           <Plus size={14} />
                           Add
                         </button>
@@ -308,26 +359,76 @@ const Billing = () => {
               </h3>
 
               <div className="customer-inputs">
-                <div>
+                <div className="customer-name-field">
                   <User size={16} />
-                  <input placeholder="Customer name" />
+                  <input placeholder="Name" value={customer.name} 
+                    onChange={(e) =>dispatch(setCustomer({
+                      ...customer,
+                      name: e.target.value,
+                      customerId: null,
+                    }))
+                  }/>
                 </div>
 
-                <div>
-                  <Phone size={16} />
-                  <input placeholder="Phone number" />
+                <div className="customer-field">
+                  <div className="customer-input-wrapper">
+                    <Phone size={16} />
+                    <input placeholder="Phone" value={customer.phone} onChange={(e)=>{
+                          const value=e.target.value;
+                          
+                          dispatch(setCustomer({
+                            ...customer,
+                            phone:value,
+                            customerId: null,
+                          }));
+
+                          
+                          fetchCustomerSuggestions(value);;
+                        }} />
+                  </div>
+                  {customerOpen && customerSuggestions.length > 0 && (
+                    <div className="customer-suggestions">
+                      {customerSuggestions.map((person) => (
+                        <div
+                          key={person._id}
+                          className="customer-suggestion-item"
+                          onClick={() => {
+                            
+
+                            dispatch(
+                              setCustomer({
+                                customerId: person._id,
+                                name: person.name,
+                                phone: person.phone,
+                                
+                              }),
+                            );
+                            setSelectedCustomer(person);
+
+                            setCustomerOpen(false);
+                            setCustomerSuggestions([]);
+                          }}
+                        >
+                          <div className="customer-info">
+                              <strong>{person.name}</strong>
+                              <p>{person.phone}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <button className="search-btn">Search</button>
+                {/* <button className="search-btn">Search</button>
                 <button className="new-btn">
                   <UserPlus size={15} /> New
-                </button>
+                </button> */}
               </div>
 
-              <p className="customer-error">
+              {/* <p className="customer-error">
                 Customer not found. Add as a new customer or continue as
                 walk-in.
-              </p>
+              </p> */}
             </div>
 
             <div className="current-bill">
@@ -348,7 +449,6 @@ const Billing = () => {
                   <span>→ Click "Add" on any product to begin billing</span>
                 </div>
               ) : (
-                
                 <div className="bill-items-table">
                   <div className="bill-table-header">
                     <span>PRODUCT</span>
@@ -358,44 +458,72 @@ const Billing = () => {
                     <span>GST AMT</span>
                     <span>LINE TOTAL</span>
                   </div>
-                  {error && (
-                    <div className="sticky-error">
-                      {error}
-                    </div>
-                  )} 
-                  {cart.map((item)=>(
+                  {error && <div className="sticky-error">{error}</div>}
+                  {cart.map((item) => (
+                    <div className="bill-item-row" key={item._id}>
+                      <div className="bill-product-info">
+                        {/* <div className="bill-product-icon">🥛</div> */}
 
-                  <div className="bill-item-row" key={item._id}>
-                    <div className="bill-product-info">
-                      {/* <div className="bill-product-icon">🥛</div> */}
-
-                      <div>
-                        <h4>{item.name}</h4>
-                        <p>{item.manufacturer}-{item.productCode}</p>
-                      </div>
-                    </div>
-
-                    <div className="bill-qty-box">
-                      <div>
-                        <button type="button" onClick={()=>{dispatch(decreaseQuantity(item._id))}}>-</button>
-                        <strong>{item.cartQuantity}</strong>
-                        <button type="button" onClick={()=>{dispatch(increaseQuantity(item._id))}}>+</button>
+                        <div>
+                          <h4>{item.name}</h4>
+                          <p>
+                            {item.manufacturer}-{item.productCode}
+                          </p>
+                        </div>
                       </div>
 
-                      <p>{item.quantity-item.cartQuantity}</p>
+                      <div className="bill-qty-box">
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              dispatch(decreaseQuantity(item._id));
+                            }}
+                          >
+                            -
+                          </button>
+                          <strong>{item.cartQuantity}</strong>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              dispatch(increaseQuantity(item._id));
+                            }}
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <p>{item.quantity - item.cartQuantity}</p>
+                      </div>
+
+                      <strong className="bill-price">
+                        {item.sellingPrice}
+                      </strong>
+
+                      <span className="gst-badge">{item.gstRate}</span>
+
+                      <span className="gst-amount">
+                        ₹
+                        {(
+                          (item.sellingPrice *
+                            item.cartQuantity *
+                            item.gstRate) /
+                          (100 + item.gstRate)
+                        ).toFixed(2)}
+                      </span>
+
+                      <strong className="line-total">
+                        ₹{(item.sellingPrice * item.cartQuantity).toFixed(2)}
+                      </strong>
+                      <span className="delete-item">
+                        <Trash2
+                          size={11}
+                          onClick={() => {
+                            dispatch(removeFromCart(item._id));
+                          }}
+                        />
+                      </span>
                     </div>
-
-                    <strong className="bill-price">{item.sellingPrice}</strong>
-
-                    <span className="gst-badge">{item.gstRate}</span>
-
-                    <span className="gst-amount">₹{(((item.sellingPrice * item.cartQuantity)*item.gstRate)/(100+item.gstRate)).toFixed(2)}</span>
-
-                    <strong className="line-total">₹{(item.sellingPrice * item.cartQuantity).toFixed(2)}</strong>
-                    <span className="delete-item">
-                      <Trash2 size={11} />
-                    </span>
-                  </div>
                   ))}
                 </div>
               )}
@@ -440,14 +568,14 @@ const Billing = () => {
                 <strong>₹{gstTotal.toFixed(2)}</strong>
               </div>
 
-              <div className="discount-row">
+              {/* <div className="discount-row">
                 <span>Discount (₹)</span>
                 <input value="0" readOnly />
-              </div>
+              </div> */}
 
               <div className="grand-total">
                 <span>Grand Total</span>
-                <strong>₹0.00</strong>
+                <strong>{grandTotal.toFixed(2)}</strong>
               </div>
             </div>
 
@@ -455,13 +583,28 @@ const Billing = () => {
               <h3>PAYMENT METHOD</h3>
 
               <div className="payment-methods">
-                <button className="active">
+                <button
+                  className={paymentMethod === "Cash" ? "active" : ""}
+                  onClick={() => {
+                    dispatch(setPaymentMethod("Cash"));
+                  }}
+                >
                   <CreditCard size={17} /> Cash
                 </button>
-                <button>
+                <button
+                  className={paymentMethod === "UPI" ? "active" : ""}
+                  onClick={() => {
+                    dispatch(setPaymentMethod("UPI"));
+                  }}
+                >
                   <Smartphone size={17} /> UPI
                 </button>
-                <button>
+                <button
+                  className={paymentMethod === "Card" ? "active" : ""}
+                  onClick={() => {
+                    dispatch(setPaymentMethod("Card"));
+                  }}
+                >
                   <CreditCard size={17} /> Card
                 </button>
               </div>
@@ -470,20 +613,33 @@ const Billing = () => {
             <div className="summary-card">
               <h3>INVOICE ACTIONS</h3>
 
-              <button className="generate-btn" disabled>
+              <button
+                className={`generate-btn ${cart.length === 0 ? "disabled-invoice" : ""}`}
+                disabled={cart.length === 0}
+              >
                 <ReceiptText size={16} /> Generate Invoice
               </button>
 
-              <div className="action-row">
+              <div
+                className={`action-row ${cart.length === 0 ? "disabled-invoice" : ""}`}
+                disabled={cart.length === 0}
+              >
                 <button>
                   <Save size={15} /> Save Draft
                 </button>
-                <button className="clear-btn">
+                <button
+                  className={`clear-btn ${cart.length === 0 ? "disabled-invoice" : ""}`}
+                  onClick={() => dispatch(clearCart())}
+                  disabled={cart.length === 0}
+                >
                   <RotateCcw size={15} /> Clear Cart
                 </button>
               </div>
 
-              <button className="print-btn">
+              <button
+                className={`print-btn ${cart.length === 0 ? "disabled-invoice" : ""}`}
+                disabled={cart.length === 0}
+              >
                 <Printer size={15} /> Print Preview
               </button>
             </div>

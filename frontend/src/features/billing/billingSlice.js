@@ -5,11 +5,16 @@ const billingSlice=createSlice({
     name:'billing',
     initialState:{
         cart:[],
-        customer:null,
+        customer: {
+            customerId: null,
+            name: "",
+            phone: "",
+        },
         paymentMethod:"Cash",
         discount:0,
         loading:false,
         error:null,
+        customerFetchError:null
         
         
     },
@@ -120,7 +125,15 @@ const billingSlice=createSlice({
         },
         clearBillingError:(state)=>{
             state.error=null;
-        }
+        },
+        // setCustomerFetchError:(state,action)=>{
+        //    state.loading = false;
+        //     state.error = "";
+        // },
+        // clearCustomerFetchError:(state)=>{
+        //     state.error=null;
+        // }
+        
         
         
     }

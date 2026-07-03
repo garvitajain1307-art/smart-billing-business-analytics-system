@@ -3,7 +3,7 @@ import HSNMaster from "../models/HSNMaster.js";
 
 export const searchHsn=asyncHandler(async(req,res,next)=>{
     const {query}= req.query;
-    if(!query || query.trim===""){
+    if(!query || query.trim()===""){
         return res.status(200).json({
             success: true,
             hsnList: [],
