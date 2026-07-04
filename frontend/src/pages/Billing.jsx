@@ -23,7 +23,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import "./Billing.css";
 import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,setRestockError,clearRestockError,stopProductLoading} from "../features/product/productSlice"
-import {setBillingLoading,addToCart,removeFromCart, increaseQuantity,decreaseQuantity,clearCart,setCustomer,clearCustomer,setPaymentMethod,setDiscount,setBillingError,clearBillingError} from "../features/billing/billingSlice"
+import {setBillingLoading,addToCart,removeFromCart, increaseQuantity,decreaseQuantity,clearCart,setCustomer,clearCustomer,setPaymentMethod,setDiscount,setBillingError,clearBillingError,setGeneratedInvoice} from "../features/billing/billingSlice"
 const Billing = () => {
     const [extended, setExtended] = useState(false);
     const [search,setSearch]=useState("")
@@ -33,6 +33,8 @@ const Billing = () => {
     const [customerSuggestions, setCustomerSuggestions]=useState([]);
     const [customerOpen, setCustomerOpen] = useState(false);
     const [categoryOpen, setCategoryOpen] = useState(false);
+    const [invoiceNo,setInvoiceNo]=useState("");
+    
     const { products,categories,selectedProduct} = useSelector((state) => state.product);
     const {cart,customer,paymentMethod,discount,loading,error}=useSelector((state) => state.billing);
     
@@ -60,6 +62,28 @@ const Billing = () => {
     }, 0);
     const navigate=useNavigate();
     const dispatch=useDispatch();
+    const fetchNextInvoiceNo=async (value)=>{
+        try{
+          
+
+          const res = await fetch("http://localhost:4000/api/v1/invoice/getNextInvoiceNo",
+            {
+              credentials: "include",
+            }
+         );
+         const data = await res.json();
+          if (!data.success) {
+              dispatch(setBillingError(data.message||"Failed to fetch Invoice No. "));
+                return;
+          }
+
+          setInvoiceNo(data.invoiceNo);
+        }catch(err){
+          dispatch(setBillingError("Failed to fetch customer suggestions"));
+
+        }
+      }
+
     const fetchProducts = async () => {
           try {
               dispatch(setProductLoading());
@@ -74,13 +98,13 @@ const Billing = () => {
               const data = await res.json();
   
               if (!data.success) {
-                  dispatch(setProductError(data.message));
+                  dispatch(setBillingError(data.message));
                   return;
               }
   
               dispatch(setProducts(data.products));
           } catch (err) {
-              dispatch(setProductError(err.message));
+              dispatch(setBillingError(err.message));
           }
       };
       const fetchCategories = async () => {
@@ -100,14 +124,58 @@ const Billing = () => {
               }
               dispatch(setCategories(data.categories));
           } catch (err) {
-              dispatch(setProductError(err.message));
+              dispatch(setBillingError(err.message));
           }
       };
       useEffect(() => {
+        fetchNextInvoiceNo();
           fetchProducts();
           fetchCategories();
       },[]);
 
+      const handleGenerateInvoice=async()=>{
+        try{
+          setBillingLoading();
+          const invoiceData={
+            customerId:customer.customerId,
+            customerName:customer.name,
+            customerPhone:customer.phone,
+            paymentMethod:paymentMethod,
+            items:cart.map((item)=>({
+              productId:item._id,
+              quantity:item.cartQuantity
+            }))
+          };
+
+          const res = await fetch("http://localhost:4000/api/v1/invoice/generateInvoice",{
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    } ,
+            credentials: "include",
+            body: JSON.stringify(invoiceData),
+                  
+            });
+              const data = await res.json();
+              if (!data.success) {
+                  dispatch(setBiilingError(data.message || data.errors?.[0] || "Failed to generate invoice"));
+                  return;
+              }
+              console.log("Generated invoice:", data.invoice);
+              dispatch(setGeneratedInvoice(data.invoice));
+              dispatch(clearCart());
+              dispatch(clearCustomer());
+              fetchProducts();
+              fetchNextInvoiceNo();
+
+              
+        }catch(err){
+          dispatch(setBillingError("Something went wrong while generating invoice"));
+
+        }
+
+      }
+      
       const filteredProducts = products.filter((product) => {
       const searchText = search.trim().toLowerCase();
 
@@ -216,7 +284,7 @@ const Billing = () => {
           <div className="invoice-details">
             <h2>Billing / POS</h2>
             <p>
-              {today} <span className="separator">·</span> INV-2024-0285
+              {today} <span className="separator">·</span> {invoiceNo}
             </p>
           </div>
 
@@ -361,7 +429,7 @@ const Billing = () => {
               <div className="customer-inputs">
                 <div className="customer-name-field">
                   <User size={16} />
-                  <input placeholder="Name" value={customer.name} 
+                  <input placeholder="Name" value={customer?.name||""} 
                     onChange={(e) =>dispatch(setCustomer({
                       ...customer,
                       name: e.target.value,
@@ -373,7 +441,7 @@ const Billing = () => {
                 <div className="customer-field">
                   <div className="customer-input-wrapper">
                     <Phone size={16} />
-                    <input placeholder="Phone" value={customer.phone} onChange={(e)=>{
+                    <input placeholder="Phone" value={customer?.phone||""} onChange={(e)=>{
                           const value=e.target.value;
                           
                           dispatch(setCustomer({
@@ -615,7 +683,7 @@ const Billing = () => {
 
               <button
                 className={`generate-btn ${cart.length === 0 ? "disabled-invoice" : ""}`}
-                disabled={cart.length === 0}
+                disabled={cart.length === 0} onClick={handleGenerateInvoice}
               >
                 <ReceiptText size={16} /> Generate Invoice
               </button>

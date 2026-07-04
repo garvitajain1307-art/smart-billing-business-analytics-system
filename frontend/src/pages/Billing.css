@@ -1042,16 +1042,19 @@ body {
 }
 
 .customer-suggestions {
-  position: absolute;
-  top: 44px;
-  left: 0;
-  width: 100%;
-  background: #fff;
-  border: 1px solid #dbe3ef;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
-  z-index: 999;
-  overflow: hidden;
+    position: absolute;
+    top: 44px;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+    z-index: 999;
+
+    max-height: 180px;   /* adjust as needed */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .customer-suggestion-item {
@@ -1091,4 +1094,21 @@ body {
   margin: 0;
   font-size: 12px;
   color: #64748b;
+}
+
+.customer-suggestions::-webkit-scrollbar {
+    width: 6px;
+}
+
+.customer-suggestions::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.customer-suggestions::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+}
+
+.customer-suggestions::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }

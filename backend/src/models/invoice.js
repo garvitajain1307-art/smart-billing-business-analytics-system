@@ -25,7 +25,7 @@ const invoiceSchema=mongoose.Schema({
     customerId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Customer",
-        required:true
+        required:false
     },
     customerDetails: {
       name: {
@@ -88,6 +88,11 @@ const invoiceSchema=mongoose.Schema({
             required: true
         },
 
+        unit: {
+          value: Number,
+          type: String
+        },  
+
         unitPrice: {
           type: Number,
           required: true,
@@ -103,7 +108,7 @@ const invoiceSchema=mongoose.Schema({
           required: true,
         },
 
-        finalPrice: {
+        lineTotal: {
           type: Number,
           required: true,
         },
@@ -128,10 +133,10 @@ const invoiceSchema=mongoose.Schema({
 
     },
     
-    paymentMethod:{
-        type:String,
-        enum:["cash","upi","credit card","debit card","net banking"],
-        default:"cash"
+    paymentMethod: {
+      type: String,
+      enum: ["Cash", "UPI", "Card"],
+      default: "Cash"
     },
     profit:{
         
@@ -148,6 +153,8 @@ const invoiceSchema=mongoose.Schema({
 {
     timestamps:true,
 })
+
+invoiceSchema.index({ companyId: 1, createdAt: -1 });
 
 
 const Invoice=mongoose.model('Invoice',invoiceSchema);

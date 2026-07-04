@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 
+
 const billingSlice=createSlice({
     name:'billing',
     initialState:{
@@ -14,7 +15,8 @@ const billingSlice=createSlice({
         discount:0,
         loading:false,
         error:null,
-        customerFetchError:null
+        customerFetchError:null,
+        generatedInvoice:null
         
         
     },
@@ -104,7 +106,11 @@ const billingSlice=createSlice({
             state.error = null;
         },
         clearCustomer:(state)=>{
-            state.customer=null;
+           state.customer = {
+                customerId: null,
+                name: "",
+                phone: "",
+             };
             state.loading = false;
             state.error = null;
            
@@ -133,11 +139,14 @@ const billingSlice=createSlice({
         // clearCustomerFetchError:(state)=>{
         //     state.error=null;
         // }
+        setGeneratedInvoice: (state, action) => {
+            state.generatedInvoice = action.payload;
+        }
         
         
         
     }
 })
 
-export const { setBillingLoading,addToCart,removeFromCart, increaseQuantity,decreaseQuantity,clearCart,setCustomer,clearCustomer,setPaymentMethod,setDiscount,setBillingError,clearBillingError,}=billingSlice.actions;
+export const { setBillingLoading,addToCart,removeFromCart, increaseQuantity,decreaseQuantity,clearCart,setCustomer,clearCustomer,setPaymentMethod,setDiscount,setBillingError,clearBillingError,setGeneratedInvoice}=billingSlice.actions;
 export default billingSlice.reducer;

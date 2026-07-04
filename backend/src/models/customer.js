@@ -33,6 +33,11 @@ const customerSchema=mongoose.Schema({
         type:Number,
         default:0,
         min:[0,'Revenue cannot be negative']
+    },
+    totalProfit: {
+        type: Number,
+        default: 0,
+        min: [0, "Profit cannot be negative"]
     }
 
 },
@@ -42,7 +47,7 @@ const customerSchema=mongoose.Schema({
 
 
 
-
+customerSchema.index({ phone: 1, companyId: 1 }, { unique: true });
 
 const Customer=mongoose.model('Customer',customerSchema);
 
