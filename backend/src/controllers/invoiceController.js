@@ -313,3 +313,19 @@ export const downloadInvoicePDF = asyncHandler(async (req, res, next) => {
     res.send(pdfBuffer);
 
 });
+
+export const getAllInvoices = asyncHandler(async (req, res, next) => {
+    const companyId=req.admin.companyId;
+        if(!companyId){
+            return next(new ErrorHandler("Please setup your company first", 400));
+    
+        }
+    
+        const invoices=await Invoice.find({companyId}).sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            message: "All invoices fetched successfully",
+            invoices
+        });
+
+})
