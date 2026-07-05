@@ -141,12 +141,15 @@ const billingSlice=createSlice({
         // }
         setGeneratedInvoice: (state, action) => {
             state.generatedInvoice = action.payload;
-        }
+        },
+        clearGeneratedInvoice: (state) => {
+            state.generatedInvoice = null;
+        },
         
         
         
     }
 })
 
-export const { setBillingLoading,addToCart,removeFromCart, increaseQuantity,decreaseQuantity,clearCart,setCustomer,clearCustomer,setPaymentMethod,setDiscount,setBillingError,clearBillingError,setGeneratedInvoice}=billingSlice.actions;
+export const { setBillingLoading,addToCart,removeFromCart, increaseQuantity,decreaseQuantity,clearCart,setCustomer,clearCustomer,setPaymentMethod,setDiscount,setBillingError,clearBillingError,setGeneratedInvoice,clearGeneratedInvoice}=billingSlice.actions;
 export default billingSlice.reducer;

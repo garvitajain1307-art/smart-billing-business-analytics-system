@@ -1,0 +1,284 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:#fff;
+    color:#1e293b;
+}
+
+.invoice-page{
+    width:210mm;
+    min-height:297mm;
+    margin:auto;
+    padding:24mm 22mm;
+}
+
+/* ---------------- HEADER ---------------- */
+
+.top-section{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:45px;
+}
+
+.company-info{
+    width:45%;
+}
+
+.company-info h1{
+    color:#2f7dbd;
+    font-size:34px;
+    margin-bottom:20px;
+}
+
+.company-info p{
+    margin-bottom:8px;
+    font-size:15px;
+    font-weight:600;
+}
+
+/* ---------------- INVOICE TITLE ---------------- */
+
+.invoice-title{
+    width:42%;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+}
+
+.invoice-title h2{
+    font-size:44px;
+    color:#2f7dbd;
+    letter-spacing:2px;
+    margin-bottom:28px;
+}
+
+/* ---------------- INVOICE META ---------------- */
+
+.invoice-meta{
+    width:100%;
+    /* border:2px solid #2f7dbd; */
+}
+
+.meta-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+}
+
+.meta-row div{
+    text-align:center;
+}
+
+.meta-row.header{
+    background:#2f7dbd;
+    color:#fff;
+    font-size:14px;
+    font-weight:700;
+}
+
+.meta-row.header div{
+    padding:10px;
+}
+
+.meta-row.value{
+    font-size:15px;
+    font-weight:700;
+}
+
+.meta-row.value div{
+    padding:12px;
+}
+
+/* .meta-row div:first-child{
+    border-right:1px solid #2f7dbd;
+} */
+
+/* .meta-row.value{
+    border-top:1px solid #2f7dbd;
+} */
+
+/* ---------------- BILL SECTION ---------------- */
+
+.bill-section{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:35px;
+}
+
+.bill-to{
+    width:45%;
+}
+
+.bill-to h3{
+    background:#2f7dbd;
+    color:#fff;
+    padding:9px 15px;
+    font-size:15px;
+    margin-bottom:14px;
+}
+
+.bill-to p{
+    margin-bottom:8px;
+    font-size:15px;
+}
+
+/* ---------------- PAYMENT ---------------- */
+
+.payment-info{
+    width:42%;
+    display:flex;
+    justify-content:flex-end;
+}
+
+.payment-box{
+    width:220px;
+    border:2px solid #2f7dbd;
+}
+
+.payment-box span{
+    display:block;
+    background:#2f7dbd;
+    color:#fff;
+    padding:9px;
+    text-align:center;
+    font-size:14px;
+    font-weight:700;
+}
+
+.payment-box strong{
+    display:block;
+    padding:12px;
+    text-align:center;
+    font-size:16px;
+    font-weight:700;
+}
+
+/* ---------------- TABLE ---------------- */
+
+.items-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+
+.items-table thead{
+    background:#2f7dbd;
+    color:#fff;
+}
+
+.items-table th{
+    padding:11px;
+    font-size:14px;
+    font-weight:700;
+}
+
+.items-table td{
+    padding:12px 10px;
+    border-bottom:1px solid #d9d9d9;
+    font-size:14px;
+}
+
+.items-table th:first-child,
+.items-table td:first-child{
+    text-align:left;
+}
+
+.items-table th:not(:first-child),
+.items-table td:not(:first-child){
+    text-align:center;
+}
+
+.items-table small{
+    color:#64748b;
+}
+
+/* ---------------- BOTTOM ---------------- */
+
+.bottom-section{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-top:30px;
+}
+
+.thank-you{
+    width:55%;
+    text-align:center;
+    color:#2f7dbd;
+    font-style:italic;
+    font-size:22px;
+    font-weight:700;
+    padding-top:22px;
+}
+
+/* ---------------- TOTALS ---------------- */
+
+.totals-box{
+    width:34%;
+    background:#e8f1fa;
+}
+
+.totals-box div{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 18px;
+    border-bottom:1px solid #c9dcec;
+    font-size:15px;
+}
+
+.totals-box span{
+    font-weight:600;
+}
+
+.totals-box strong{
+    font-weight:700;
+}
+
+.grand-total{
+    background:#d0e5f7;
+    color:#1d4e89;
+    font-size:21px !important;
+    font-weight:800;
+}
+
+/* ---------------- FOOTER ---------------- */
+
+.footer{
+    margin-top:70px;
+    text-align:center;
+    font-size:14px;
+}
+
+.footer p{
+    margin-bottom:6px;
+}
+
+.footer strong{
+    font-size:14px;
+}
+
+/* ---------------- PRINT ---------------- */
+
+@page{
+    size:A4;
+    margin:12mm;
+}
+
+@media print{
+
+    body{
+        background:#fff;
+    }
+
+    .invoice-page{
+        width:100%;
+        padding:0;
+    }
+
+}

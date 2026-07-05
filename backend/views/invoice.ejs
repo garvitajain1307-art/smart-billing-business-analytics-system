@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Invoice - <%= invoice.invoiceNo %></title>
+  <link rel="stylesheet" href="/invoice.css" />
+</head>
+
+<body>
+  <div class="invoice-page">
+
+    <div class="top-section">
+      <div class="company-info">
+        <h1><%= invoice.companyDetails.companyName %></h1>
+        <p><%= invoice.companyDetails.address %></p>
+        <p>Phone: <%= invoice.companyDetails.phone %></p>
+        <p>Email: <%= invoice.companyDetails.email %></p>
+        <p>GST No: <%= invoice.companyDetails.gstNo %></p>
+      </div>
+
+    <div class="invoice-title">
+    
+        <h2>INVOICE</h2>
+    
+        <div class="invoice-meta">
+    
+            <div class="meta-row header">
+                <div>INVOICE #</div>
+                <div>DATE</div>
+            </div>
+    
+            <div class="meta-row value">
+                <div>
+                    <%= invoice.invoiceNo %>
+                </div>
+                <div>
+                    <%= new Date(invoice.createdAt).toLocaleDateString("en-IN") %>
+                </div>
+            </div>
+    
+        </div>
+    
+    </div>
+    </div>
+
+    <div class="bill-section">
+      <div class="bill-to">
+        <h3>BILL TO</h3>
+        <p><%= invoice.customerDetails.name %></p>
+        <p>Phone: <%= invoice.customerDetails.phone %></p>
+      </div>
+
+        <div class="payment-info">
+
+            <div class="payment-box">
+                <span>PAYMENT METHOD</span>
+                <strong><%= invoice.paymentMethod %></strong>
+            </div>
+
+        </div>
+    </div>
+
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>GST %</th>
+          <th>GST Amt</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% invoice.items.forEach((item) => { %>
+          <tr>
+            <td>
+              <strong><%= item.productName %></strong>
+              <br />
+              <small><%= item.productCode %></small>
+            </td>
+            <td><%= item.quantity %></td>
+            <td>₹<%= item.unitPrice.toFixed(2) %></td>
+            <td><%= item.gstRate %>%</td>
+            <td>₹<%= item.gstAmount.toFixed(2) %></td>
+            <td>₹<%= item.lineTotal.toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <div class="bottom-section">
+      <div class="thank-you">
+        Thank you for your business!
+      </div>
+
+      <div class="totals-box">
+        <div>
+          <span>SUBTOTAL</span>
+          <strong>₹<%= invoice.subTotal.toFixed(2) %></strong>
+        </div>
+
+        <div>
+          <span>GST TOTAL</span>
+          <strong>₹<%= invoice.gstTotal.toFixed(2) %></strong>
+        </div>
+
+        <div class="grand-total">
+          <span>TOTAL</span>
+          <strong>₹<%= invoice.totalAmount.toFixed(2) %></strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>
+        If you have any questions about this invoice, please contact
+      </p>
+      <strong>
+        <%= invoice.companyDetails.companyName %>,
+        <%= invoice.companyDetails.phone %>,
+        <%= invoice.companyDetails.email %>
+      </strong>
+    </div>
+
+  </div>
+</body>
+</html>

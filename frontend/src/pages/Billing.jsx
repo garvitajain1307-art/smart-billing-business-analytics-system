@@ -17,13 +17,13 @@ import {
   Smartphone,
   Save,
   RotateCcw,
-  Printer,ChevronDown,Check,Trash2
+  Printer,ChevronDown,Check,Trash2,Mail,Eye
 } from "lucide-react";
 
 import { useDispatch, useSelector } from "react-redux";
 import "./Billing.css";
 import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,setRestockError,clearRestockError,stopProductLoading} from "../features/product/productSlice"
-import {setBillingLoading,addToCart,removeFromCart, increaseQuantity,decreaseQuantity,clearCart,setCustomer,clearCustomer,setPaymentMethod,setDiscount,setBillingError,clearBillingError,setGeneratedInvoice} from "../features/billing/billingSlice"
+import {setBillingLoading,addToCart,removeFromCart, increaseQuantity,decreaseQuantity,clearCart,setCustomer,clearCustomer,setPaymentMethod,setDiscount,setBillingError,clearBillingError,setGeneratedInvoice,clearGeneratedInvoice} from "../features/billing/billingSlice"
 const Billing = () => {
     const [extended, setExtended] = useState(false);
     const [search,setSearch]=useState("")
@@ -35,8 +35,9 @@ const Billing = () => {
     const [categoryOpen, setCategoryOpen] = useState(false);
     const [invoiceNo,setInvoiceNo]=useState("");
     
+    
     const { products,categories,selectedProduct} = useSelector((state) => state.product);
-    const {cart,customer,paymentMethod,discount,loading,error}=useSelector((state) => state.billing);
+    const {cart,customer,paymentMethod,discount,loading,error,generatedInvoice}=useSelector((state) => state.billing);
     
     const totalItems = cart.length;
 
@@ -135,7 +136,7 @@ const Billing = () => {
 
       const handleGenerateInvoice=async()=>{
         try{
-          setBillingLoading();
+          dispatch(setBillingLoading());
           const invoiceData={
             customerId:customer.customerId,
             customerName:customer.name,
@@ -158,15 +159,21 @@ const Billing = () => {
             });
               const data = await res.json();
               if (!data.success) {
-                  dispatch(setBiilingError(data.message || data.errors?.[0] || "Failed to generate invoice"));
+                  dispatch(setBillingError(data.message || data.errors?.[0] || "Failed to generate invoice"));
                   return;
               }
               console.log("Generated invoice:", data.invoice);
               dispatch(setGeneratedInvoice(data.invoice));
+              window.open(
+                `http://localhost:4000/api/v1/invoice/downloadInvoicePDF/${data.invoice._id}`,
+                "_blank"
+              );
               dispatch(clearCart());
               dispatch(clearCustomer());
               fetchProducts();
               fetchNextInvoiceNo();
+              dispatch(setPaymentMethod("Cash"));
+              
 
               
         }catch(err){
@@ -215,6 +222,8 @@ const Billing = () => {
         }
       }
     }
+
+    
     const fetchCustomerSuggestions=async (value)=>{
         try{
           if(!value.trim()){
@@ -692,9 +701,10 @@ const Billing = () => {
                 className={`action-row ${cart.length === 0 ? "disabled-invoice" : ""}`}
                 disabled={cart.length === 0}
               >
-                <button>
-                  <Save size={15} /> Save Draft
-                </button>
+                {/* <button className={`mail-btn ${generatedInvoice === null ? "disabled-invoice" : ""}`}
+                disabled={generatedInvoice === null} >
+                  <Mail  size={16} /> <span>Email</span>
+                </button> */}
                 <button
                   className={`clear-btn ${cart.length === 0 ? "disabled-invoice" : ""}`}
                   onClick={() => dispatch(clearCart())}
@@ -703,12 +713,11 @@ const Billing = () => {
                   <RotateCcw size={15} /> Clear Cart
                 </button>
               </div>
-
+              <div></div>
               <button
-                className={`print-btn ${cart.length === 0 ? "disabled-invoice" : ""}`}
-                disabled={cart.length === 0}
+                className="print-btn" 
               >
-                <Printer size={15} /> Print Preview
+                <Eye   size={15} /> <span>View all Invoices</span>
               </button>
             </div>
           </aside>

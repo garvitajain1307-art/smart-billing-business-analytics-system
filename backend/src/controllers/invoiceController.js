@@ -6,6 +6,7 @@ import Product from "../models/product.js";
 import Company from "../models/company.js";
 import Counter from "../models/counter.js";
 import Invoice from "../models/invoice.js";
+import {generatePDF} from "../utils/generatePDF.js"
 
 
 export const generateInvoice=[
@@ -247,11 +248,6 @@ export const generateInvoice=[
         
         
     })
-
-
-    
-
-    
 ]
 
 
@@ -280,3 +276,40 @@ export const getNextInvoiceNo=asyncHandler(async(req,res,next)=>{
         invoiceNo,
     });
 })
+
+export const previewInvoice=asyncHandler(async(req,res,next)=>{
+    const invoiceId=req.params.invoiceId;
+
+    const invoice=await Invoice.findById({_id:invoiceId,companyId:req.admin.companyId});
+    if(!invoice){
+        return next(new ErrorHandler("Invoice not found", 404));
+    }
+    return res.render("invoice", {
+        success: true,
+
+        invoice,
+  });
+
+})
+
+export const downloadInvoicePDF = asyncHandler(async (req, res, next) => {
+
+    const invoice = await Invoice.findOne({
+        _id: req.params.invoiceId,
+        companyId: req.admin.companyId,
+    });
+
+    if (!invoice) {
+        return next(new ErrorHandler("Invoice not found", 404));
+    }
+
+    const pdfBuffer = await generatePDF(invoice);
+
+    res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="${invoice.invoiceNo}.pdf"`,
+    });
+
+    res.send(pdfBuffer);
+
+});
