@@ -80,5 +80,5 @@ const invoiceSlice=createSlice({
     
 })
 
-export const {setInvoiceLoading,setInvoices,setSelectedInvoice,addInvoice,deleteInvoice,setInvoiceError,clearInvoiceError,clearInvoiceSuccess,clearSelectedInvoice,stopInvoiceLoading}=invoiceSlice.actions;
+export const {setInvoiceLoading,setInvoices,setSelectedInvoice,addInvoice,removeInvoiceFromState,setInvoiceError,clearInvoiceError,clearInvoiceSuccess,clearSelectedInvoice,stopInvoiceLoading}=invoiceSlice.actions;
 export default invoiceSlice.reducer;

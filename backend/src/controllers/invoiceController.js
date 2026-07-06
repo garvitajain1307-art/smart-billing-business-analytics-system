@@ -329,3 +329,27 @@ export const getAllInvoices = asyncHandler(async (req, res, next) => {
         });
 
 })
+
+export const deleteInvoice =asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+    if(!companyId){
+        return next(new ErrorHandler("Please setup your company first", 400));
+    }
+
+    const invoiceId=req.params.invoiceId;
+    if(!invoiceId){
+        return next(new ErrorHandler("Pls eneter an invoice id first", 400));
+
+    }
+    const invoice=Invoice.findOne({_id:invoiceId,companyId:companyId});
+    if(!invoice){
+        return next(new ErrorHandler("Invoice not found", 400));
+
+    }
+    await invoice.deleteOne();
+
+    res.status(200).json({
+        success:true,
+         message: "Invoice deleted successfully",
+    })
+})
