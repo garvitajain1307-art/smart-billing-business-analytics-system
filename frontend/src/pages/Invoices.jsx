@@ -61,7 +61,7 @@ const Invoices = () => {
         dispatch(setInvoiceError(data.message));
         return;
       }
-
+      console.log(data.invoices);
       dispatch(setInvoices(data.invoices));
     } catch (err) {
       dispatch(setInvoiceError(err.message));
@@ -123,24 +123,24 @@ const Invoices = () => {
       return dateA - dateB;
     });
 
-  // const totalRevenue = invoices.reduce((sum, invoice) => {
-  //     return sum + (invoice.totalAmount || 0);
-  // }, 0);
+  const totalRevenue = invoices.reduce((sum, invoice) => {
+      return sum + (invoice.totalAmount || 0);
+  }, 0);
 
-  // const today = new Date().toDateString();
+  const today = new Date().toDateString();
 
-  // const todayRevenue = invoices.reduce((sum, invoice) => {
-  //     const invoiceDate = new Date(invoice.createdAt).toDateString();
+  const todayRevenue = invoices.reduce((sum, invoice) => {
+      const invoiceDate = new Date(invoice.createdAt).toDateString();
 
-  //     if (invoiceDate === today) {
-  //         return sum + (invoice.totalAmount || 0);
-  //     }
+      if (invoiceDate === today) {
+          return sum + (invoice.totalAmount || 0);
+      }
 
-  //     return sum;
-  // }, 0);
+      return sum;
+  }, 0);
 
-  // const avgInvoiceValue =
-  //     invoices.length > 0 ? Math.round(totalRevenue / invoices.length) : 0;
+  const avgInvoiceValue =
+      invoices.length > 0 ? Math.round(totalRevenue / invoices.length) : 0;
 
   return (
     <div className={`invoices-page ${extended ? "extended" : ""}`}>
@@ -242,7 +242,7 @@ const Invoices = () => {
             <div className="invoice-insight-card">
               <div>
                 <p>Revenue Generated</p>
-                <h2>₹1000</h2>
+                <h2>₹{totalRevenue.toFixed(2)}</h2>
                 <span className="invoice-green-text">
                   <ArrowUpRight size={15} /> Total paid revenue
                 </span>
@@ -255,7 +255,7 @@ const Invoices = () => {
             <div className="invoice-insight-card">
               <div>
                 <p>Today's Revenue</p>
-                <h2>₹5000</h2>
+                <h2>₹{todayRevenue.toFixed(2)}</h2>
                 <span className="invoice-red-text">
                   <ArrowDownRight size={15} /> Today's sales
                 </span>
@@ -268,7 +268,7 @@ const Invoices = () => {
             <div className="invoice-insight-card">
               <div>
                 <p>Avg Invoice Value</p>
-                <h2>₹9000</h2>
+                <h2>₹{avgInvoiceValue.toFixed(2)}</h2>
                 <span className="invoice-red-text">
                   <ArrowDownRight size={15} /> Average bill size
                 </span>
@@ -287,12 +287,12 @@ const Invoices = () => {
                     {filteredInvoices.length} of {invoices.length} invoices
                   </p>
                 </div>
-                <button
+                {/* <button
                   className="invoice-live-sync-btn"
                   onClick={fetchInvoices} type="button"
                 >
                   Live sync
-                </button>
+                </button> */}
               </div>
 
               <div className="invoice-table-wrapper">
@@ -368,8 +368,22 @@ const Invoices = () => {
                                   dispatch(setSelectedInvoice(invoice))
                                 }
                               />
-                              <Pencil className="pencil-icon" size={17} />
-                              <RefreshCw className="refresh-icon" size={17} />
+
+                              <FileDown
+                                className="pencil-icon"
+                                size={17}
+                                onClick={() => {
+                                  if (!invoice.pdfUrl) {
+                                    alert(
+                                      "PDF is not available for this invoice yet",
+                                    );
+                                    return;
+                                  }
+
+                                  window.open(invoice.pdfUrl, "_blank");
+                                }}
+                              />
+
                               <Trash2
                                 className="delete-icon"
                                 size={17}
@@ -538,7 +552,16 @@ const Invoices = () => {
 
             <div className="invoice-drawer-actions">
               <div className="drawer-actions-one">
-                <button type="button"><FileDown size={17} /><span>Download</span></button>
+                <button type="button" onClick={() => {
+                                  if (!selectedInvoice.pdfUrl) {
+                                    alert(
+                                      "PDF is not available for this invoice yet",
+                                    );
+                                    return;
+                                  }
+
+                                  window.open(selectedInvoice.pdfUrl, "_blank");
+                }}><FileDown size={17} /><span>Download</span></button>
               </div>
 
               <div className="drawer-actions-two">

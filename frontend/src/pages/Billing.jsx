@@ -298,13 +298,26 @@ const Billing = () => {
           </div>
 
           <div className="billing-header-actions">
-            <button>
+            <button
+              type="button"
+              onClick={() => {
+                dispatch(clearCart());
+                dispatch(clearCustomer());
+                dispatch(clearBillingError());
+                dispatch(clearGeneratedInvoice());
+                dispatch(setPaymentMethod("Cash")); 
+              }}
+            >
               <ReceiptText size={15} /> New Invoice
             </button>
-            <button>
-              <Clock size={15} /> Recent Invoices
-            </button>
-            <button>
+
+            <NavLink to="/invoices">
+              <button type="button">
+                <Clock size={15} /> Recent Invoices
+              </button>
+            </NavLink>
+
+            <button type="button">
               <TrendingUp size={15} /> Today's Sales
             </button>
             <Bell size={20} className="bell-icon" />
@@ -438,30 +451,41 @@ const Billing = () => {
               <div className="customer-inputs">
                 <div className="customer-name-field">
                   <User size={16} />
-                  <input placeholder="Name" value={customer?.name||""} 
-                    onChange={(e) =>dispatch(setCustomer({
-                      ...customer,
-                      name: e.target.value,
-                      customerId: null,
-                    }))
-                  }/>
+                  <input
+                    placeholder="Name"
+                    value={customer?.name || ""}
+                    onChange={(e) =>
+                      dispatch(
+                        setCustomer({
+                          ...customer,
+                          name: e.target.value,
+                          customerId: null,
+                        }),
+                      )
+                    }
+                  />
                 </div>
 
                 <div className="customer-field">
                   <div className="customer-input-wrapper">
                     <Phone size={16} />
-                    <input placeholder="Phone" value={customer?.phone||""} onChange={(e)=>{
-                          const value=e.target.value;
-                          
-                          dispatch(setCustomer({
-                            ...customer,
-                            phone:value,
-                            customerId: null,
-                          }));
+                    <input
+                      placeholder="Phone"
+                      value={customer?.phone || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
 
-                          
-                          fetchCustomerSuggestions(value);;
-                        }} />
+                        dispatch(
+                          setCustomer({
+                            ...customer,
+                            phone: value,
+                            customerId: null,
+                          }),
+                        );
+
+                        fetchCustomerSuggestions(value);
+                      }}
+                    />
                   </div>
                   {customerOpen && customerSuggestions.length > 0 && (
                     <div className="customer-suggestions">
@@ -470,14 +494,11 @@ const Billing = () => {
                           key={person._id}
                           className="customer-suggestion-item"
                           onClick={() => {
-                            
-
                             dispatch(
                               setCustomer({
                                 customerId: person._id,
                                 name: person.name,
                                 phone: person.phone,
-                                
                               }),
                             );
                             setSelectedCustomer(person);
@@ -487,8 +508,8 @@ const Billing = () => {
                           }}
                         >
                           <div className="customer-info">
-                              <strong>{person.name}</strong>
-                              <p>{person.phone}</p>
+                            <strong>{person.name}</strong>
+                            <p>{person.phone}</p>
                           </div>
                         </div>
                       ))}
@@ -692,7 +713,8 @@ const Billing = () => {
 
               <button
                 className={`generate-btn ${cart.length === 0 ? "disabled-invoice" : ""}`}
-                disabled={cart.length === 0} onClick={handleGenerateInvoice}
+                disabled={cart.length === 0}
+                onClick={handleGenerateInvoice}
               >
                 <ReceiptText size={16} /> Generate Invoice
               </button>
@@ -714,10 +736,8 @@ const Billing = () => {
                 </button>
               </div>
               <div></div>
-              <button
-                className="print-btn" 
-              >
-                <Eye   size={15} /> <span>View all Invoices</span>
+              <button className="print-btn">
+                <Eye size={15} /> <span>View all Invoices</span>
               </button>
             </div>
           </aside>

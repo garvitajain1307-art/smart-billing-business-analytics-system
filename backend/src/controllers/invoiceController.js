@@ -8,6 +8,8 @@ import Counter from "../models/counter.js";
 import Invoice from "../models/invoice.js";
 import {generatePDF} from "../utils/generatePDF.js"
 
+import { uploadPdfToCloudinary } from "../utils/uploadPdfToCloudinary.js";
+
 
 export const generateInvoice=[
     
@@ -211,6 +213,19 @@ export const generateInvoice=[
             paymentMethod,
             profit
         })
+
+        const pdfData = await generatePDF(invoice);
+        const pdfBuffer = Buffer.from(pdfData);
+
+        const cloudinaryResult = await uploadPdfToCloudinary(
+             pdfBuffer,
+            invoice.invoiceNo
+        );
+
+        invoice.pdfUrl = cloudinaryResult.secure_url;
+        invoice.pdfPublicId = cloudinaryResult.public_id;
+
+        await invoice.save();
 
         //UPDATE STOCK
 

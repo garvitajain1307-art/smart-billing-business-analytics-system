@@ -1135,3 +1135,39 @@ body {
 .customer-suggestions::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+
+.billing-header-actions button {
+    
+    transition: all 0.25s ease;
+}
+
+.billing-header-actions button:hover {
+    cursor: pointer;
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
+}
+
+.billing-header-actions button:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.15);
+}
+
+.billing-header-actions button svg {
+    transition: transform 0.25s ease;
+}
+
+.billing-header-actions button:hover svg {
+    transform: scale(1.08);
+}
+
+.billing-header-actions button:hover {
+    cursor: pointer;
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.08);
+}

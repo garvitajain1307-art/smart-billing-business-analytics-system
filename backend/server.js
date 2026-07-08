@@ -1,8 +1,14 @@
 import { config } from "dotenv";
+
+
 config();
 
-import { connectDb } from "./src/config/db.js";
-import app from "./src/app.js";
+
+
+const { connectDb } = await import("./src/config/db.js");
+await import("./src/config/cloudinary.js");
+const { default: app } = await import("./src/app.js");
+
 
 connectDb()
 

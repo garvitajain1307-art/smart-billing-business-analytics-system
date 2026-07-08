@@ -144,6 +144,15 @@ const invoiceSchema=mongoose.Schema({
         required:[true,'Profit is required'],
 
     },
+
+    pdfUrl: {
+      type: String,
+      default: null,
+    },
+    pdfPublicId: {
+      type: String,
+      default: null,
+    },
     
     
     
