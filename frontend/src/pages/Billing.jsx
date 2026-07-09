@@ -736,9 +736,12 @@ const Billing = () => {
                 </button>
               </div>
               <div></div>
+              <NavLink to="/invoices">
               <button className="print-btn">
                 <Eye size={15} /> <span>View all Invoices</span>
               </button>
+            </NavLink>
+              
             </div>
           </aside>
         </section>

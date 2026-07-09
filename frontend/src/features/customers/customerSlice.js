@@ -6,6 +6,10 @@ const customerSlice=createSlice({
     initialState:{
         customers:[],
         selectedCustomer:null,
+        selectedCustomerInvoices: [],
+        selectedCustomerLastPurchase: null,
+        selectedCustomerAverageOrderValue: 0,
+
         loading:false,
         error:null,
         success:false,
@@ -51,7 +55,7 @@ const customerSlice=createSlice({
             state.success = true;
         },
         
-        deleteCustomer: (state, action) => {
+        removeCustomerFromState: (state, action) => {
             state.customers = state.customers.filter(
                 (customer) => customer._id !== action.payload
             );
@@ -80,14 +84,26 @@ const customerSlice=createSlice({
         },
 
         clearSelectedCustomer: (state) => {
-            state.selectedProduct = null;
+            state.selectedCustomer = null;
+            state.selectedCustomerInvoices = [];
+            state.selectedCustomerLastPurchase = null;
+            state.selectedCustomerAverageOrderValue = 0;
+
         },
         stopCustomerLoading: (state) => {
             state.loading = false;
-        }
+        },
+        setSelectedCustomerDetails: (state, action) => {
+            state.selectedCustomer = action.payload.customer;
+            state.selectedCustomerInvoices = action.payload.invoices;
+            state.selectedCustomerLastPurchase = action.payload.lastPurchase;
+            state.selectedCustomerAverageOrderValue = action.payload.averageOrderValue;
+            state.loading = false;
+            state.error = null;
+        },
         
     }
 })
 
-export const {setCustomerLoading,setCustomers,setSelectedCustomer,addCustomer,updateCustomer,deleteCustomer,setCustomerError,clearCustomerError,clearCustomerSuccess,clearSelectedCustomer,stopCustomerLoading}=customerSlice.actions;
+export const {setCustomerLoading,setCustomers,setSelectedCustomer,addCustomer,updateCustomer,removeCustomerFromState,setCustomerError,clearCustomerError,clearCustomerSuccess,clearSelectedCustomer,stopCustomerLoading,setSelectedCustomerDetails}=customerSlice.actions;
 export default customerSlice.reducer;

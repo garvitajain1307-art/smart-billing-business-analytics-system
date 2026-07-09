@@ -2,6 +2,8 @@ import { asyncHandler } from "../middlewares/asyncHandler.js";
 import { check, validationResult } from "express-validator";
 import ErrorHandler from "../middlewares/error.js";
 import Customer from "../models/customer.js";
+import Invoice from "../models/invoice.js";
+
 
 
 export const createCustomer=[
@@ -94,4 +96,52 @@ export const getAllCustomers=asyncHandler(async(req,res,next)=>{
         message: "All customers fetched successfully",
         customers
     });
+})
+
+export const getCustomerDetails=asyncHandler(async(req,res,next)=>{
+    const customerId=req.params.id;
+    const customer=await Customer.findById(customerId);
+
+    if(!customer){
+        return next(new ErrorHandler("Customer not found", 400));
+
+    }
+
+    const invoices=await Invoice.find({customerId:req.params.id,}).sort({createdAt:-1});
+
+    const lastPurchase=invoices.length>0?invoices[0].createdAt:null;
+
+    const averageOrderValue = customer.timesServed? Math.round(customer.totalRevenue / customer.timesServed): 0;
+    res.status(200).json({
+    success: true,
+    customer,
+    invoices,
+    lastPurchase,
+    averageOrderValue,
+  });
+
+})
+
+export const deleteCustomer =asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+    if(!companyId){
+        return next(new ErrorHandler("Please setup your company first", 400));
+    }
+
+    const customerId=req.params.customerId;
+    if(!customerId){
+        return next(new ErrorHandler("Pls eneter a customer id first", 400));
+
+    }
+    const customer=Customer.findOne({_id:customerId,companyId:companyId});
+    if(!icustomer){
+        return next(new ErrorHandler("Customer not found", 400));
+
+    }
+    await customer.deleteOne();
+
+    res.status(200).json({
+        success:true,
+         message: "Customer deleted successfully",
+    })
 })

@@ -14,12 +14,12 @@ import {
     Trash2,
     ArrowUpRight,
     ArrowDownRight,
-    ChevronDown,Users,Calendar,Check, FileText, Download, Mail,TrendingUp,FileDown,MessageSquare,Crown,RefreshCcw,UserRoundPlus,Wallet 
+    ChevronDown,Users,Calendar,Check, FileText, Download, Mail,TrendingUp,FileDown,MessageSquare,Crown,RefreshCcw,UserRoundPlus,Wallet ,ReceiptText
 } from "lucide-react";
 import "./Customers.css";
 import { useDispatch, useSelector } from "react-redux";
-import {setCustomerLoading,setCustomers,setSelectedCustomer,addCustomer,updateCustomer,deleteCustomer,setCustomerError,clearCustomerError,clearCustomerSuccess,clearSelectedCustomer,stopCustomerLoading} from "../features/customers/customerSlice";
-
+import {setCustomerLoading,setCustomers,setSelectedCustomer,addCustomer,updateCustomer,removeCustomerFromState,setCustomerError,clearCustomerError,clearCustomerSuccess,clearSelectedCustomer,stopCustomerLoading,setSelectedCustomerDetails} from "../features/customers/customerSlice";
+import { setCustomer } from "../features/billing/billingSlice";
 const Customers = () => {
   const [extended, setExtended] = useState(false);
 
@@ -31,7 +31,7 @@ const Customers = () => {
   const [timeOpen, setTimeOpen] = useState(false);
 
   const dispatch = useDispatch();
-  const { customers, selectedCustomer, loading, error, success } = useSelector(
+  const { customers, selectedCustomer,selectedCustomerInvoices,selectedCustomerLastPurchase,selectedCustomerAverageOrderValue,loading, error, success } = useSelector(
     (state) => state.customer,
   );
   const navigate = useNavigate();
@@ -64,28 +64,59 @@ const Customers = () => {
     fetchCustomers();
   }, []);
 
-  //   const handleDeleteCustomer = async (customerId) => {
-  //     if (!window.confirm("Delete this Customer?")) return;
+    const handleDeleteCustomer = async (customerId) => {
+      if (!window.confirm("Delete this Customer?")) return;
 
-  //     try {
-  //       const res = await fetch(
-  //         `http://localhost:4000/api/v1/invoice/deleteInvoice/${invoiceId}`,
-  //         {
-  //           method: "DELETE",
-  //           credentials: "include",
-  //         },
-  //       );
-  //       const data = await res.json();
-  //       if (!data.success) {
-  //         dispatch(setInvoiceError(data.message));
-  //         return;
-  //       }
+      try {
+        const res = await fetch(
+          `http://localhost:4000/api/v1/customer/deleteCustomer/${customerId}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          },
+        );
+        const data = await res.json();
+        if (!data.success) {
+          dispatch(setCustomerError(data.message));
+          return;
+        }
 
-  //       dispatch(removeInvoiceFromState(invoiceId));
-  //     } catch (error) {
-  //       dispatch(setInvoiceError(error.message));
-  //     }
-  //   };
+        dispatch(removeCustomerFromState(invoiceId));
+      } catch (error) {
+        dispatch(setCustomerError(error.message));
+      }
+    };
+
+  const handleCustomerClick=async(customer)=>{
+    
+
+    try{
+      dispatch(setCustomerLoading());
+      const res=await fetch(`http://localhost:4000/api/v1/customer/getCustomerDetails/${customer._id}`,
+        {
+          method:"GET",
+          credentials:"include"
+
+
+      });
+
+      const data=await res.json();
+
+      if (!data.success) {
+      dispatch(setCustomerError(data.message));
+
+      return;
+    }
+
+     
+
+    dispatch(setSelectedCustomerDetails(data));
+    dispatch(setSelectedCustomer(customer));
+   
+    }catch(error){
+      dispatch(setCustomerError("Failed to fetch customer details"));
+    }
+  }
 
   const filteredCustomers = customers.filter((customer) => {
   const searchText = customerSearch.trim().toLowerCase();
@@ -336,7 +367,11 @@ const Customers = () => {
 
                           <td className="customer-lastPurchase">11 Jun 2026</td>
 
-                          <td className="customer-Status">VIP</td>
+                          
+
+                          <td >{customer.timesServed >= 10? (
+                <span className="customer-vip-badge">♛ VIP Customer</span>
+              ):(<span className="customer-Status">REGULAR</span>)}</td>
 
                           <td>
                             <div className="customer-action-icons">
@@ -344,7 +379,8 @@ const Customers = () => {
                                 size={17}
                                 className="eye-icon"
                                 onClick={() =>
-                                  dispatch(setSelectedCustomer(customer))
+                                  handleCustomerClick(customer)
+                                  // dispatch(setSelectedCustomer(customer))}
                                 }
                               />
 
@@ -362,6 +398,11 @@ const Customers = () => {
                                   window.open(invoice.pdfUrl, "_blank");
                                 }}
                               /> */}
+
+                              <RefreshCw
+                                size={17}
+                                className="refresh-customers-icon"
+                              />
 
                               <Trash2
                                 className="delete-icon"
@@ -387,8 +428,10 @@ const Customers = () => {
             <div className="customer-rankings-row">
               <div className="customer-ranking-card">
                 <div className="customer-ranking-title">
-                  <div className="customer-ranking-title-icon"><Crown size={17} /></div>
-                  
+                  <div className="customer-ranking-title-icon">
+                    <Crown size={17} />
+                  </div>
+
                   <h3>Top Revenue Customers</h3>
                 </div>
 
@@ -417,8 +460,10 @@ const Customers = () => {
 
               <div className="customer-ranking-card">
                 <div className="customer-ranking-title">
-                  <div className="customer-ranking-title-icon"><Users size={16} /></div>
-                  
+                  <div className="customer-ranking-title-icon">
+                    <Users size={16} />
+                  </div>
+
                   <h3>Most Frequent Customers</h3>
                 </div>
 
@@ -446,6 +491,163 @@ const Customers = () => {
           </div>
         </div>
       </div>
+
+      {selectedCustomer && (
+        <div className="customer-drawer-overlay">
+          <div className="customer-drawer">
+            <button
+              type="button"
+              className="customer-drawer-close"
+              onClick={() => dispatch(clearSelectedCustomer())}
+            >
+              ×
+            </button>
+
+            <div className="customer-drawer-top">
+              <span className="customer-drawer-avatar">
+                {selectedCustomer.name
+                  ?.split(" ")
+                  .map((word) => word[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase() || "NA"}
+              </span>
+
+              <div>
+                <h2>{selectedCustomer.name}</h2>
+                <p>
+                  {/* {selectedCustomer.customerCode || "C-1001"} ·{" "} */}
+                  {selectedCustomer.phone}
+                </p>
+              </div>
+
+              {selectedCustomer.timesServed >= 10 && (
+                <span className="customer-vip-badge">♛ VIP Customer</span>
+              )}
+            </div>
+
+            <p className="customer-section-title">CUSTOMER INSIGHTS</p>
+
+            <div className="customer-insights-grid">
+              <div className="customer-drawer-insight-card">
+                <span>Times Served</span>
+                <strong>{selectedCustomer.timesServed || 0}</strong>
+              </div>
+
+              <div className="customer-drawer-insight-card">
+                <span>Total Revenue </span>
+                <strong>₹{selectedCustomer.totalRevenue || 0}</strong>
+              </div>
+
+                <div className="customer-drawer-insight-card">
+                  <span>Total Profit</span>
+                  <strong>₹{selectedCustomer.totalProfit || 0}</strong>
+                </div>
+
+              <div className="customer-drawer-insight-card">
+                <span>Average Order Value</span>
+                <strong>₹{selectedCustomerAverageOrderValue || 0}</strong>
+              </div>
+
+              {/* <div className="customer-insight-card">
+                <span>Last Purchase</span>
+                <strong>
+                  {selectedCustomerLastPurchase
+                    ? new Date(
+                        selectedCustomerLastPurchase
+                      ).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "-"}
+                </strong>
+              </div> */}
+            </div>
+
+            <div className="customer-history-heading">
+              <p className="customer-section-title">PURCHASE HISTORY</p>
+              <span>{selectedCustomerInvoices?.length || 0} invoices</span>
+            </div>
+
+            <div className="customer-history-box">
+              <table className="customer-history-table">
+                <thead>
+                  <tr>
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Method</th>
+                    <th></th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {selectedCustomerInvoices?.map((invoice) => (
+                    <tr key={invoice._id}>
+                      <td>{invoice.invoiceNo}</td>
+
+                      <td>
+                        {invoice.createdAt
+                          ? new Date(invoice.createdAt).toLocaleDateString(
+                              "en-IN",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )
+                          : "-"}
+                      </td>
+
+                      <td>₹{invoice.totalAmount}</td>
+
+                      <td>
+                        <span className="payment-pill">
+                          {invoice.paymentMethod}
+                        </span>
+                      </td>
+
+                      <td className="history-actions">
+                        {/* <button
+                          type="button"
+                          onClick={() => dispatch(setSelectedInvoice(invoice))}
+                        >
+                          <Eye size={16} />
+                        </button> */}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!invoice.pdfUrl) {
+                              alert("PDF is not available");
+                              return;
+                            }
+                            window.open(invoice.pdfUrl, "_blank");
+                          }}
+                        >
+                          <Download className="download-drawer-btn" size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="customer-drawer-actions">
+              {/* <button type="button" className="customer-edit-btn">
+                <Pencil size={16} /> Edit
+              </button> */}
+
+              <button type="button" className="customer-invoice-btn" onClick={()=>{dispatch(setCustomer(selectedCustomer));
+    navigate("/billing");}}>
+                <ReceiptText size={16} /> New Invoice
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
