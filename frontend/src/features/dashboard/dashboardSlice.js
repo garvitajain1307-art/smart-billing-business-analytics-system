@@ -32,7 +32,9 @@ const dashboardSlice=createSlice({
             }
 
         },
-        salesTrend:[]
+        salesTrend:[],
+        recentInvoices:[],
+        topSellingProducts:[],
         
     },
     reducers:{
@@ -68,6 +70,14 @@ const dashboardSlice=createSlice({
             state.loading = false;
             state.salesTrend = action.payload;
 
+        },
+        setRecentInvoices:(state,action)=>{
+            state.loading=false;
+            state.recentInvoices=action.payload
+        },
+        setTopSellingProducts:(state,action)=>{
+            state.loading=false;
+            state.topSellingProducts=action.payload
         }
        
         
@@ -75,5 +85,5 @@ const dashboardSlice=createSlice({
     }
 })
 
-export const {setDashboardLoading,setDashboardError,clearDashboardError,setLowStockProducts,setDashboardSummary,setSalesTrend}=dashboardSlice.actions;
+export const {setDashboardLoading,setDashboardError,clearDashboardError,setLowStockProducts,setDashboardSummary,setSalesTrend,setRecentInvoices,setTopSellingProducts}=dashboardSlice.actions;
 export default dashboardSlice.reducer;

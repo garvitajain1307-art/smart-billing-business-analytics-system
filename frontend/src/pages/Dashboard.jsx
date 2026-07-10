@@ -8,7 +8,10 @@ import {
   ReceiptText,
   Users,
   TrendingUp,
-  TrendingDown
+  TrendingDown,FileDown,Smartphone,CreditCard, Plus,
+  PackagePlus,
+  UserPlus,
+  PackageSearch,
 } from "lucide-react";
 
 import {LineChart,Line,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,} from "recharts"
@@ -17,8 +20,8 @@ import Sidebar from "../components/Sidebar";
 import "./Dashboard.css";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {setDashboardLoading,setDashboardError,clearDashboardError,setLowStockProducts,setDashboardSummary,setSalesTrend}from "../features/dashboard/dashboardSlice"
-import { useNavigate } from "react-router-dom";
+import {setDashboardLoading,setDashboardError,clearDashboardError,setLowStockProducts,setDashboardSummary,setSalesTrend,setRecentInvoices,setTopSellingProducts}from "../features/dashboard/dashboardSlice"
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
     const [extended, setExtended] = useState(false);
@@ -37,7 +40,7 @@ const Dashboard = () => {
       { label: "Jul 4", revenue: 51000 },
     ];
 
-     const { loading, error,lowStockProducts,lowStockCount,summary,salesTrend} = useSelector((state) => state.dashboard);
+     const { loading, error,lowStockProducts,lowStockCount,summary,salesTrend,recentInvoices,topSellingProducts} = useSelector((state) => state.dashboard);
 
      const dispatch=useDispatch();
      const navigate=useNavigate();
@@ -84,6 +87,52 @@ const Dashboard = () => {
                 dispatch(setDashboardError(err.message));
             }
         };
+        const fetchRecentInvoices = async () => {
+            try {
+                dispatch(setDashboardLoading());
+                
+    
+                const res = await fetch(
+                    "http://localhost:4000/api/v1/dashboard/getRecentInvoices",
+                    {
+                        credentials: "include",
+                    }
+                );
+                const data = await res.json();
+                if (!data.success) {
+                    dispatch(setDashboardError(data.message));
+                    return;
+                }
+                dispatch(setRecentInvoices(data.invoices));
+                
+            } catch (err) {
+                dispatch(setDashboardError(err.message));
+            }
+        };
+        
+        const fetchTopSellingProducts = async () => {
+            try {
+                dispatch(setDashboardLoading());
+                
+    
+                const res = await fetch(
+                    "http://localhost:4000/api/v1/dashboard/getTopSellingProducts",
+                    {
+                        credentials: "include",
+                    }
+                );
+                const data = await res.json();
+                if (!data.success) {
+                    dispatch(setDashboardError(data.message));
+                    return;
+                }
+                dispatch(setTopSellingProducts(data.topSellingProducts));
+                
+            } catch (err) {
+                dispatch(setDashboardError(err.message));
+            }
+        };
+        
         const fetchDashboardSummary=async (value)=>{
                 try{
                     dispatch(setDashboardLoading());
@@ -134,6 +183,8 @@ const Dashboard = () => {
             };
 
         useEffect(()=>{
+          fetchTopSellingProducts(),
+          fetchRecentInvoices(),
             fetchSalesTrend(),
             fetchLowStockProducts()
 
@@ -551,11 +602,224 @@ const Dashboard = () => {
 
               {/* Recent Invoices */}
 
-              <div className="dashboard-recent-invoices-card"></div>
+              <div className="dashboard-recent-invoices-card">
+                <div className="invoice-catalogue">
+                  <div className="invoice-catalogue-header">
+                    <div>
+                      <h3>All Invoices</h3>
+                      {/* <p>
+                    {filteredInvoices.length} of {invoices.length} invoices
+                  </p> */}
+                    </div>
+                    <NavLink
+                      to="/invoices"
+                      className="dashboard-invoices-viewAll"
+                    >
+                      <h5>View All</h5>
+                    </NavLink>
+                  </div>
+
+                  <div className="invoice-table-wrapper">
+                    <table className="invoice-table">
+                      <thead>
+                        <tr>
+                          <th>Invoice #</th>
+                          <th>Customer</th>
+                          <th>Amount</th>
+
+                          <th>Payment</th>
+                          <th>Date</th>
+
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {recentInvoices.map((invoice) => {
+                          return (
+                            <tr key={invoice._id}>
+                              <td className="invoiceNo-data">
+                                {invoice.invoiceNo}
+                              </td>
+
+                              <td>
+                                <div className="invoice-customer-info">
+                                  {/* <span className="invoice-customer-avatar">
+                                {invoice.customerDetails?.name
+                                  ?.split(" ")
+                                  .map((word) => word[0])
+                                  .slice(0, 2)
+                                  .join("")
+                                  .toUpperCase() || "NA"}
+                              </span> */}
+                                  <div>
+                                    <h4>
+                                      {invoice.customerDetails?.name?.toUpperCase() ||
+                                        "WALK-IN CUSTOMER"}
+                                    </h4>
+                                    <p>
+                                      {invoice.customerDetails?.phone ||
+                                        "No phone"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="invoiceAmount-data">
+                                ₹{invoice.totalAmount || 0}
+                              </td>
+
+                              <td className="invoicePayment-data-dashboard">
+                                <span className="dashboard-payment-icon">
+                                  {invoice.paymentMethod === "Cash" && (
+                                    <Wallet
+                                      className="dashboard-wallet"
+                                      size={14}
+                                    />
+                                  )}
+                                  {invoice.paymentMethod === "UPI" && (
+                                    <Smartphone
+                                      className="dashboard-phone"
+                                      size={14}
+                                    />
+                                  )}
+                                  {invoice.paymentMethod === "Card" && (
+                                    <CreditCard
+                                      className="dashboard-card"
+                                      size={14}
+                                    />
+                                  )}
+                                </span>
+
+                                {invoice.paymentMethod || "-"}
+                              </td>
+
+                              <td className="invoiceDate-data">
+                                {invoice.createdAt
+                                  ? new Date(
+                                      invoice.createdAt,
+                                    ).toLocaleDateString("en-IN", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
+                                  : "-"}
+                              </td>
+
+                              <td>
+                                <div className="invoice-action-icons-dashboard">
+                                  {/* <Eye
+                                size={17}
+                                className="eye-icon"
+                                onClick={() =>
+                                  dispatch(setSelectedInvoice(invoice))
+                                }
+                              /> */}
+
+                                  <FileDown
+                                    className="pencil-icon"
+                                    size={17}
+                                    onClick={() => {
+                                      if (!invoice.pdfUrl) {
+                                        alert(
+                                          "PDF is not available for this invoice yet",
+                                        );
+                                        return;
+                                      }
+
+                                      window.open(invoice.pdfUrl, "_blank");
+                                    }}
+                                  />
+
+                                  {/* <Trash2
+                                className="delete-icon"
+                                size={17}
+                                onClick={() => {
+                                  handleDeleteInvoice(invoice._id);
+                                }}
+                              /> */}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+
+                    {recentInvoices.length === 0 && (
+                      <div className="invoice-empty-state">
+                        No invoices found
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               {/* Top Selling Products */}
 
-              <div className="dashboard-top-products-card"></div>
+              <div className="dashboard-top-products-card">
+                <div className="products-catalogue">
+                  <div className="catalogue-header">
+                    <div>
+                      <h3>Top Selling Products</h3>
+                      <p>By number of units sold</p>
+                    </div>
+                  </div>
+                  <div className="products-table-wrapper">
+                    <table className="products-table">
+                      <thead>
+                        <tr>
+                          <th>Product</th>
+                          <th>Code</th>
+
+                          <th>Units Sold</th>
+                          <th>Revenue</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {topSellingProducts.map((product) => {
+                          return (
+                            <tr key={product._id}>
+                              <td>
+                                <div className="product-info">
+                                  <span className="product-avatar">
+                                    {product.name
+                                      ?.split(" ")
+                                      .map((word) => word[0])
+                                      .slice(0, 2)
+                                      .join("")
+                                      .toUpperCase()}
+                                  </span>
+                                  <div>
+                                    <h4>{product.name?.toUpperCase()}</h4>
+                                    <p>
+                                      {product.manufacturer ||
+                                        "No manufacturer"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>{product.productCode}</td>
+
+                              <td className="dashboard-units-sold">
+                                {product.totalSellings}
+                              </td>
+                              <td>
+                                ₹{" "}
+                                {(
+                                  (product.sellingPrice || 0) *
+                                  (product.totalSellings || 0)
+                                ).toLocaleString("en-IN")}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
 
               {/* Bottom Cards */}
 
@@ -573,7 +837,47 @@ const Dashboard = () => {
             <div className="dashboard-right-column">
               {/* Quick Actions */}
 
-              <div className="dashboard-quick-actions-card"></div>
+              <div className="dashboard-quick-actions-card">
+                <h3>Quick Actions</h3>
+
+                <div className="dashboard-quick-actions-grid">
+                  <button
+                    type="button"
+                    className="dashboard-quick-action dashboard-new-invoice-action"
+                    onClick={() => navigate("/billing")}
+                  >
+                    <Plus className="quick-actions-icon-1" size={22} />
+                    <span>New Invoice</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashboard-quick-action"
+                    onClick={() => navigate("/products/add-product")}
+                  >
+                    <PackagePlus className="quick-actions-icon-2" size={20} />
+                    <span>Add Product</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashboard-quick-action"
+                    onClick={() => navigate("/customers")}
+                  >
+                    <Users className="quick-actions-icon-3" size={20} />
+                    <span>View Customers</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashboard-quick-action"
+                    onClick={() => navigate("/products")}
+                  >
+                    <PackageSearch className="quick-actions-icon-4" size={20} />
+                    <span>View Inventory</span>
+                  </button>
+                </div>
+              </div>
 
               {/* Payment Distribution */}
 

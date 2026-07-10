@@ -483,3 +483,36 @@ export const getSalesTrend=asyncHandler(async(req,res,next)=>{
     });
 
 })
+
+export const getRecentInvoices = asyncHandler(async (req, res, next) => {
+    const companyId=req.admin.companyId;
+        if(!companyId){
+            return next(new ErrorHandler("Please setup your company first", 400));
+    
+        }
+    
+        const invoices=await Invoice.find({companyId}).sort({ createdAt: -1 }).limit(5);
+        res.status(200).json({
+            success: true,
+            message: "Recent invoices fetched successfully",
+            invoices
+        });
+
+})
+
+export const getTopSellingProducts=asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+        if(!companyId){
+            return next(new ErrorHandler("Please setup your company first", 400));
+    
+        }
+    
+        const topSellingProducts=await Product.find({companyId}).sort({totalSellings: -1 }).limit(5);
+        res.status(200).json({
+            success: true,
+            message: "Top Selling Products fetched successfully",
+            topSellingProducts
+        });
+
+
+})
