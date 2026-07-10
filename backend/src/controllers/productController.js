@@ -350,3 +350,23 @@ export const restockProduct = [
         });
     })
 ];
+
+export const getLowStockProducts=asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+    if(!companyId){
+        return next(new ErrorHandler("Please setup your company first", 400));
+
+    }
+
+    const products=await Product.find({companyId}).populate("categoryId", "name").sort({quantity:1});
+    const lowStockProducts = products.filter(
+            (product) => product.quantity > 0 && product.quantity <= 10
+    );
+    res.status(200).json({
+        success: true,
+        message: "Low stock products fetched successfully",
+        lowStockProducts,
+        lowStockCount:lowStockProducts.length
+    });
+
+})

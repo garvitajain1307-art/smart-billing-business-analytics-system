@@ -78,11 +78,7 @@ const Sidebar = ({ extended, setExtended }) => {
                             <span>Invoices</span>
                         </NavLink>
 
-                        <NavLink to="/analytics" className="sidebar-item">
-                            <ChartColumn size={18} />
-                            <span>Analytics</span>
-                        </NavLink>
-
+                        
                         <NavLink to="/notifications" className="sidebar-item">
                             <Bell size={18} />
                             <span>Notifications</span>
@@ -117,9 +113,9 @@ const Sidebar = ({ extended, setExtended }) => {
                             <FileText size={18} />
                         </NavLink>
 
-                        <NavLink to="/analytics" className="sidebar-item">
+                        {/* <NavLink to="/analytics" className="sidebar-item">
                             <ChartColumn size={18} />
-                        </NavLink>
+                        </NavLink> */}
 
                         <NavLink to="/notifications" className="sidebar-item">
                             <Bell size={18} />

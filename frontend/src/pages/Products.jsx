@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { NavLink,Navigate, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
     Search,
     Plus,
@@ -41,6 +42,7 @@ const Products = () => {
     const dispatch=useDispatch();
     const { products, loading, error,categories,selectedProduct,restockError } = useSelector((state) => state.product);
     const navigate=useNavigate();
+    const location = useLocation();
     const fetchProducts = async () => {
         try {
             dispatch(setProductLoading());
@@ -85,9 +87,24 @@ const Products = () => {
         }
     };
     useEffect(() => {
-        fetchProducts();
-        fetchCategories();
-    },[]);
+      fetchProducts();
+      fetchCategories();
+
+      if (location.state?.openRestockModal) {
+        setRestockModalData({
+          quantity: "",
+          productId: location.state.productId,
+          currentQuantity: location.state.currentQuantity,
+        });
+
+        setRestockModalOpen(true);
+
+        navigate(location.pathname, {
+          replace: true,
+          state: {},
+        });
+      }
+    }, []);
 
     const getProductStatus=(quantity)=>{
       if(quantity==0){

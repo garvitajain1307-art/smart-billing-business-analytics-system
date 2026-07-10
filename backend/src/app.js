@@ -8,6 +8,7 @@ import productRouter from './routes/productRoutes.js'
 import hsnRouter from './routes/hsnRoutes.js';
 import customerRouter from './routes/customerRoutes.js'
 import InvoiceRouter from './routes/invoiceRoutes.js'
+import DashboardRouter from './routes/dashboardRoutes.js'
 
 import cookieParser from "cookie-parser";
 import { errorMiddleware } from './middlewares/error.js';
@@ -50,6 +51,8 @@ app.use("/api/v1/products",productRouter);
 app.use("/api/v1/hsn",hsnRouter);
 app.use("/api/v1/customer",customerRouter);
 app.use("/api/v1/invoice",InvoiceRouter);
+app.use("/api/v1/dashboard",DashboardRouter);
+
 
 
 
