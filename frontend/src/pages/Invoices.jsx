@@ -14,7 +14,7 @@ import {
     Trash2,
     ArrowUpRight,
     ArrowDownRight,
-    ChevronDown,Users,Calendar,Check, FileText, Download, Mail,TrendingUp,FileDown,MessageSquare
+    ChevronDown,Users,Calendar,Check, FileText, Download, Mail,TrendingUp,FileDown,MessageSquare,ReceiptText,CircleDollarSign,ShoppingCart ,ChartColumn 
 } from "lucide-react";
 import "./Invoices.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -231,7 +231,7 @@ const Invoices = () => {
                 <p>Total Invoices</p>
                 <h2>{invoices.length}</h2>
                 <span className="invoice-green-text">
-                  <ArrowUpRight size={15} /> All generated bills
+                  <ReceiptText size={15} /> All generated bills
                 </span>
               </div>
               <div className="invoice-insight-icon invoice-blue-icon">
@@ -244,7 +244,7 @@ const Invoices = () => {
                 <p>Revenue Generated</p>
                 <h2>₹{totalRevenue.toFixed(2)}</h2>
                 <span className="invoice-green-text">
-                  <ArrowUpRight size={15} /> Total paid revenue
+                  <CircleDollarSign size={15}/> Total paid revenue
                 </span>
               </div>
               <div className="invoice-insight-icon invoice-green-icon">
@@ -257,7 +257,7 @@ const Invoices = () => {
                 <p>Today's Revenue</p>
                 <h2>₹{todayRevenue.toFixed(2)}</h2>
                 <span className="invoice-red-text">
-                  <ArrowDownRight size={15} /> Today's sales
+                  <ShoppingCart size={15}/> Today's sales
                 </span>
               </div>
               <div className="invoice-insight-icon invoice-orange-icon">
@@ -270,7 +270,7 @@ const Invoices = () => {
                 <p>Avg Invoice Value</p>
                 <h2>₹{avgInvoiceValue.toFixed(2)}</h2>
                 <span className="invoice-red-text">
-                  <ArrowDownRight size={15} /> Average bill size
+                  <ChartColumn size={15} /> Average bill size
                 </span>
               </div>
               <div className="invoice-insight-icon invoice-red-icon">

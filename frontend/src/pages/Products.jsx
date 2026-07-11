@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import "./Products.css";
 import { useDispatch, useSelector } from "react-redux";
-import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,setRestockError,clearRestockError,stopProductLoading} from "../features/product/productSlice"
+import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,setRestockError,clearRestockError,stopProductLoading,setTopSellingProducts,setSlowMovingProducts, setDeadStockProducts} from "../features/product/productSlice"
 
 const Products = () => {
     const [extended, setExtended] = useState(false);
@@ -40,7 +40,14 @@ const Products = () => {
         currentQuantity: "",
     });
     const dispatch=useDispatch();
-    const { products, loading, error,categories,selectedProduct,restockError } = useSelector((state) => state.product);
+    const {  loading, error,selectedProduct,restockError, } = useSelector((state) => state.product);
+    const {
+    products = [],
+    categories = [],
+    topSellingProducts = [],
+    slowMovingProducts = [],
+    deadStockProducts = [],
+} = useSelector((state) => state.product);
     const navigate=useNavigate();
     const location = useLocation();
     const fetchProducts = async () => {
@@ -61,7 +68,7 @@ const Products = () => {
                 return;
             }
 
-            dispatch(setProducts(data.products));
+            dispatch(setProducts(data.products || []));
         } catch (err) {
             dispatch(setProductError(err.message));
         }
@@ -81,12 +88,83 @@ const Products = () => {
                 dispatch(setProductError(data.message));
                 return;
             }
-            dispatch(setCategories(data.categories));
+            dispatch(setCategories(data.categories||[]));
         } catch (err) {
             dispatch(setProductError(err.message));
         }
     };
+     const fetchDeadStock = async () => {
+       try {
+         dispatch(setProductLoading());
+
+         const res = await fetch(
+           "http://localhost:4000/api/v1/dashboard/getDeadStock",
+           {
+             credentials: "include",
+           },
+         );
+
+         const data = await res.json();
+
+         if (!res.ok || !data.success) {
+           dispatch(
+             setProductError(data.message || "Error while fetching dead stock"),
+           );
+           return;
+         }
+
+         dispatch(setDeadStockProducts(data.deadStock || []));
+       } catch (err) {
+         dispatch(
+           setProductError(err.message || "Error while fetching dead stock"),
+         );
+       }
+     };
+    const fetchTopSellingProducts = async () => {
+      try {
+        dispatch(setProductLoading());
+
+        const res = await fetch(
+          "http://localhost:4000/api/v1/products/getTopSellingProducts",
+          {
+            credentials: "include",
+          },
+        );
+        const data = await res.json();
+        if (!data.success) {
+          dispatch(setProductError(data.message));
+          return;
+        }
+        dispatch(setTopSellingProducts(data.topSellingProducts||[]));
+      } catch (err) {
+        dispatch(setProductError(err.message));
+      }
+    };
+    const fetchSlowMovingProducts = async () => {
+      try {
+        dispatch(setProductLoading());
+
+        const res = await fetch(
+          "http://localhost:4000/api/v1/products/getSlowMovingProducts",
+          {
+            credentials: "include",
+          },
+        );
+        const data = await res.json();
+        if (!data.success) {
+          dispatch(setProductError(data.message));
+          return;
+        }
+        dispatch(setSlowMovingProducts(data.slowMovingProducts||[]));
+      } catch (err) {
+        dispatch(setProductError(err.message));
+      }
+    };
+            
     useEffect(() => {
+      fetchDeadStock();
+      fetchSlowMovingProducts();
+      fetchTopSellingProducts();
       fetchProducts();
       fetchCategories();
 
@@ -288,106 +366,123 @@ const Products = () => {
 
         <div className="products-content">
           <div className="products-navbar">
-    <div className="searchProducts">
-        <Search size={20} className="search-icon" />
-        <input type="text" placeholder="Search by product name, code or HSN..." value={search} onChange={(e)=> setSearch(e.target.value)}/>
-    </div>
+            <div className="searchProducts">
+              <Search size={20} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search by product name, code or HSN..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
 
-    <div className="custom-dropdown">
-      
-        <button className="dropdown-trigger" onClick={()=>setCategoryOpen(!categoryOpen)}>
-          {selectedCategory}
-            <ChevronDown size={18} />
-        </button>
+            <div className="custom-dropdown">
+              <button
+                className="dropdown-trigger"
+                onClick={() => setCategoryOpen(!categoryOpen)}
+              >
+                {selectedCategory}
+                <ChevronDown size={18} />
+              </button>
 
-       { categoryOpen &&(
-        <div className="dropdown-menu">
-             
-                <div className="dropdown-option" onClick={() => {setSelectedCategory("All categories");setCategoryOpen(false)}}>
-                  All categories
-                  {selectedCategory==="All categories" && <Check size={17} />}
-                </div>
-
-                {categories.map((category)=>(
-                  <div className="dropdown-option" key={category._id} onClick={() => {setSelectedCategory(category.name);setCategoryOpen(false)}}>
-                     {category.name}
-                  {selectedCategory===category.name && <Check size={17} />}
+              {categoryOpen && (
+                <div className="dropdown-menu">
+                  <div
+                    className="dropdown-option"
+                    onClick={() => {
+                      setSelectedCategory("All categories");
+                      setCategoryOpen(false);
+                    }}
+                  >
+                    All categories
+                    {selectedCategory === "All categories" && (
+                      <Check size={17} />
+                    )}
                   </div>
-                ))}
-            
-            
-        </div>
-      )}
-       
-    </div>
-    
 
-    <div className="custom-dropdown">
-    <button
-        className="dropdown-trigger"
-        onClick={() => setStockOpen(!stockOpen)}
-    >
-        {selectedStock}
-        <ChevronDown size={18} />
-    </button>
-
-    {stockOpen && (
-        <div className="dropdown-menu">
-            <div
-                className="dropdown-option"
-                onClick={() => {
-                    setSelectedStock("All Stock");
-                    setStockOpen(false);
-                }}
-            >
-                All Stock
-                {selectedStock === "All Stock" && <Check size={17} />}
+                  {categories.map((category) => (
+                    <div
+                      className="dropdown-option"
+                      key={category._id}
+                      onClick={() => {
+                        setSelectedCategory(category.name);
+                        setCategoryOpen(false);
+                      }}
+                    >
+                      {category.name}
+                      {selectedCategory === category.name && (
+                        <Check size={17} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div
-                className="dropdown-option"
-                onClick={() => {
-                    setSelectedStock("In Stock");
-                    setStockOpen(false);
-                }}
-            >
-                In Stock
-                {selectedStock === "In Stock" && <Check size={17} />}
-            </div>
+            <div className="custom-dropdown">
+              <button
+                className="dropdown-trigger"
+                onClick={() => setStockOpen(!stockOpen)}
+              >
+                {selectedStock}
+                <ChevronDown size={18} />
+              </button>
 
-            <div
-                className="dropdown-option"
-                onClick={() => {
-                    setSelectedStock("Low Stock");
-                    setStockOpen(false);
-                }}
-            >
-                Low Stock
-                {selectedStock === "Low Stock" && <Check size={17} />}
-            </div>
+              {stockOpen && (
+                <div className="dropdown-menu">
+                  <div
+                    className="dropdown-option"
+                    onClick={() => {
+                      setSelectedStock("All Stock");
+                      setStockOpen(false);
+                    }}
+                  >
+                    All Stock
+                    {selectedStock === "All Stock" && <Check size={17} />}
+                  </div>
 
-            <div
-                className="dropdown-option"
-                onClick={() => {
-                    setSelectedStock("Out of Stock");
-                    setStockOpen(false);
-                }}
-            >
-                Out of Stock
-                {selectedStock === "Out of Stock" && <Check size={17} />}
-            </div>
-        </div>
-    )}
-  </div>
-     <NavLink to="/products/add-product" >
-        <button className="add-product-btn">
-           <Plus size={20} />
-           Add Product
-        </button>
-    </NavLink>
+                  <div
+                    className="dropdown-option"
+                    onClick={() => {
+                      setSelectedStock("In Stock");
+                      setStockOpen(false);
+                    }}
+                  >
+                    In Stock
+                    {selectedStock === "In Stock" && <Check size={17} />}
+                  </div>
 
-    
-</div>
+                  <div
+                    className="dropdown-option"
+                    onClick={() => {
+                      setSelectedStock("Low Stock");
+                      setStockOpen(false);
+                    }}
+                  >
+                    Low Stock
+                    {selectedStock === "Low Stock" && <Check size={17} />}
+                  </div>
+
+                  <div
+                    className="dropdown-option"
+                    onClick={() => {
+                      setSelectedStock("Out of Stock");
+                      setStockOpen(false);
+                    }}
+                  >
+                    Out of Stock
+                    {selectedStock === "Out of Stock" && <Check size={17} />}
+                  </div>
+                </div>
+              )}
+            </div>
+            <NavLink to="/products/add-product">
+              <button className="add-product-btn">
+                <Plus size={20} />
+                Add Product
+              </button>
+            </NavLink>
+          </div>
 
           <div className="inventory-area">
             <div className="inventory-header">
@@ -405,7 +500,7 @@ const Products = () => {
                   <p>Total Products</p>
                   <h2>{products.length}</h2>
                   <span className="green-text">
-                    <ArrowUpRight size={15} /> +8 this month
+                    <ArrowUpRight size={15} /> Active Products
                   </span>
                 </div>
                 <div className="insight-icon blue-icon">
@@ -457,7 +552,9 @@ const Products = () => {
               <div className="catalogue-header">
                 <div>
                   <h3>Product catalogue</h3>
-                  <p>{filteredProducts.length} of {products.length} products</p>
+                  <p>
+                    {filteredProducts.length} of {products.length} products
+                  </p>
                 </div>
                 <button className="live-sync-btn">Live sync</button>
               </div>
@@ -479,44 +576,78 @@ const Products = () => {
                   </thead>
 
                   <tbody>
-                    {filteredProducts.map((product)=>{
+                    {filteredProducts.map((product) => {
                       const status = getProductStatus(product.quantity);
-                     return( 
-                      <tr key={product._id}>
-                        
-                      <td>
-                        <div className="product-info">
-                          <span className="product-avatar">{product.name?.split(" ").map((word)=>word[0]).slice(0,2).join("").toUpperCase()}</span>
-                          <div>
-                            <h4>{product.name?.toUpperCase()}</h4>
-                            <p>{product.manufacturer || "No manufacturer"}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{product.productCode}</td>
-                      <td>
-                        <span className="category-pill">{product.categoryId?.name || "Uncategorized"}</span>
-                      </td>
-                      <td>{product.hsnCode || "-"}</td>
-                      <td>₹{product.sellingPrice}</td>
-                      <td>₹{product.purchasePrice}</td>
-                      <td>{product.quantity}</td>
-                      <td>{product.gstRate}%</td>
-                      <td>
-                        
-                    <span className={`status ${status.className}`}><Dot size={30}/>{status.label}</span>
-                      </td>
-                      <td>
-                        <div className="action-icons">
-                          <Eye size={17} onClick={()=>dispatch(setSelectedProduct(product))}/>
-                          <Pencil size={17} onClick={()=>navigate(`/products/edit-product/${product._id}`)}/>
-                          <RefreshCw size={17} />
-                          <Trash2 size={17} onClick={() => handleDeleteProduct(product._id)} />
-                        </div>
-                      </td>
-                    </tr>
-
-                    )})}
+                      return (
+                        <tr key={product._id}>
+                          <td>
+                            <div className="product-info">
+                              <span className="product-avatar">
+                                {product.name
+                                  ?.split(" ")
+                                  .map((word) => word[0])
+                                  .slice(0, 2)
+                                  .join("")
+                                  .toUpperCase()}
+                              </span>
+                              <div>
+                                <h4>{product.name?.toUpperCase()}</h4>
+                                <p>
+                                  {product.manufacturer || "No manufacturer"}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td>{product.productCode}</td>
+                          <td>
+                            <span className="category-pill">
+                              {product.categoryId?.name || "Uncategorized"}
+                            </span>
+                          </td>
+                          <td>{product.hsnCode || "-"}</td>
+                          <td>₹{product.sellingPrice}</td>
+                          <td>₹{product.purchasePrice}</td>
+                          <td>{product.quantity}</td>
+                          <td>{product.gstRate}%</td>
+                          <td>
+                            <span className={`status ${status.className}`}>
+                              <Dot size={30} />
+                              {status.label}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="action-icons">
+                              <Eye
+                                size={17}
+                                onClick={() =>
+                                  dispatch(setSelectedProduct(product))
+                                }
+                              />
+                              <Pencil
+                                size={17}
+                                onClick={() =>
+                                  navigate(
+                                    `/products/edit-product/${product._id}`,
+                                  )
+                                }
+                              />
+                              <RefreshCw size={17} />
+                              <Trash2
+                                size={17}
+                                onClick={() => handleDeleteProduct(product._id)}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {filteredProducts.length === 0 && (
+                      <tr>
+                        <td colSpan="10">
+                          <div className="invoice-empty-state">No Products</div>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -542,30 +673,45 @@ const Products = () => {
                   </div>
 
                   <div className="alert-list">
-                   {lowStock.map((product)=>{
-                    return(
-                    
-                    <div className="alert-item" key={product._id}>
-                      <div>
-                        <h5>{product.name}</h5>
-                        <p>{product.unit} {product.unitType}   ·   {product.quantity} left</p>
-                      </div>
-                      <div className="alert-actions">
-                        <button onClick={()=>navigate(`/products/edit-product/${product._id}`)}>Edit</button>
-                        <button onClick={() => {
-                          setRestockModalData({
-                          quantity: "",
-                          productId: product._id,
-                          currentQuantity: product.quantity,
-                        });
-                        setRestockModalOpen(true)}}>Restock</button>
-                      </div>
-                    </div>
-                    )
-                   })}
-
-                   
-                    
+                    {lowStock.map((product) => {
+                      return (
+                        <div className="alert-item" key={product._id}>
+                          <div>
+                            <h5>{product.name}</h5>
+                            <p>
+                              {product.unit} {product.unitType} ·{" "}
+                              {product.quantity} left
+                            </p>
+                          </div>
+                          <div className="alert-actions">
+                            <button
+                              onClick={() =>
+                                navigate(
+                                  `/products/edit-product/${product._id}`,
+                                )
+                              }
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                setRestockModalData({
+                                  quantity: "",
+                                  productId: product._id,
+                                  currentQuantity: product.quantity,
+                                });
+                                setRestockModalOpen(true);
+                              }}
+                            >
+                              Restock
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {lowStock.length === 0 && (
+                      <div className="invoice-empty-state">No Products</div>
+                    )}
                   </div>
                 </div>
 
@@ -584,28 +730,44 @@ const Products = () => {
                   </div>
 
                   <div className="alert-list">
-                    {outOfStock.map((product)=>{
-                      return(
+                    {outOfStock.map((product) => {
+                      return (
                         <div className="alert-item">
-                      <div>
-                        <h5>{product.name}</h5>
-                        <p>{product.unit} {product.unitType}</p>
-                      </div>
-                      <div className="alert-actions">
-                        <button onClick={()=>navigate(`/products/edit-product/${product._id}`)}>Edit</button>
-                        <button onClick={() => {
-                          setRestockModalData({
-                          quantity: "",
-                          productId: product._id,
-                          currentQuantity: product.quantity,
-                        });
-                        setRestockModalOpen(true)}}>Restock</button>
-                      </div>
-                    </div>
-                        
-                      ) 
+                          <div>
+                            <h5>{product.name}</h5>
+                            <p>
+                              {product.unit} {product.unitType}
+                            </p>
+                          </div>
+                          <div className="alert-actions">
+                            <button
+                              onClick={() =>
+                                navigate(
+                                  `/products/edit-product/${product._id}`,
+                                )
+                              }
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                setRestockModalData({
+                                  quantity: "",
+                                  productId: product._id,
+                                  currentQuantity: product.quantity,
+                                });
+                                setRestockModalOpen(true);
+                              }}
+                            >
+                              Restock
+                            </button>
+                          </div>
+                        </div>
+                      );
                     })}
-                    
+                    {outOfStock.length === 0 && (
+                      <div className="invoice-empty-state">No Products</div>
+                    )}
                   </div>
                 </div>
 
@@ -624,37 +786,57 @@ const Products = () => {
                   </div>
 
                   <div className="alert-list">
-                    {expirySoonProducts.map((product)=>{
-
-                      return(
-                      <>
-                      <div className="alert-item">
-                      <div>
-                        <h5>{product.name}</h5>
-                        <p>{product.quantity} left · {product.productCode}</p>
-                        <p className="product-expiry-date">Expires on{" "}
-                        {new Date(product.expiry).toLocaleDateString("en-IN", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                        })} </p>
-                      </div>
-                      <div className="alert-actions">
-                        <button onClick={()=>navigate(`/products/edit-product/${product._id}`)}>Edit</button>
-                        <button 
-                        onClick={() => {
-                          setRestockModalData({
-                          quantity: "",
-                          productId: product._id,
-                          currentQuantity: product.quantity,
-                        });
-                        setRestockModalOpen(true)}}>Restock</button>
-                      </div>
-                    </div>
-                      </>
-                    
-                    )})}
-
+                    {expirySoonProducts.map((product) => {
+                      return (
+                        <>
+                          <div className="alert-item">
+                            <div>
+                              <h5>{product.name}</h5>
+                              <p>
+                                {product.quantity} left · {product.productCode}
+                              </p>
+                              <p className="product-expiry-date">
+                                Expires on{" "}
+                                {new Date(product.expiry).toLocaleDateString(
+                                  "en-IN",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )}{" "}
+                              </p>
+                            </div>
+                            <div className="alert-actions">
+                              <button
+                                onClick={() =>
+                                  navigate(
+                                    `/products/edit-product/${product._id}`,
+                                  )
+                                }
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setRestockModalData({
+                                    quantity: "",
+                                    productId: product._id,
+                                    currentQuantity: product.quantity,
+                                  });
+                                  setRestockModalOpen(true);
+                                }}
+                              >
+                                Restock
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })}
+                    {expirySoonProducts.length === 0 && (
+                      <div className="invoice-empty-state">No Products</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -662,7 +844,7 @@ const Products = () => {
 
             <div className="products-performance">
               <h3>Product performance</h3>
-              <p>Movers, laggards and dead stock — last 90 days.</p>
+              <p>Movers, laggards and dead stock</p>
 
               <div className="performance-card">
                 <div className="performance-box">
@@ -672,32 +854,27 @@ const Products = () => {
                   </div>
 
                   <div className="performance-list">
-                    <div className="performance-item">
-                      <span>1</span>
-                      <div>
-                        <h5>Maggi 2-Minute Noodles</h5>
-                        <p>8,800 units sold</p>
-                      </div>
-                      <strong>₹1,23,200</strong>
-                    </div>
-
-                    <div className="performance-item">
-                      <span>2</span>
-                      <div>
-                        <h5>Amul Gold Full Cream Milk</h5>
-                        <p>5,320 units sold</p>
-                      </div>
-                      <strong>₹3,83,040</strong>
-                    </div>
-
-                    <div className="performance-item">
-                      <span>3</span>
-                      <div>
-                        <h5>Parle-G Original Biscuits</h5>
-                        <p>2,100 units sold</p>
-                      </div>
-                      <strong>₹1,57,500</strong>
-                    </div>
+                    {topSellingProducts.map((product, index) => {
+                      return (
+                        <>
+                          <div className="performance-item" key={product._id}>
+                            <span>{index + 1}</span>
+                            <div>
+                              <h5>{product.name}</h5>
+                              <p>{product.totalSellings} units sold</p>
+                            </div>
+                            <strong>
+                              ₹
+                              {product.totalSellings *
+                                product.sellingPrice.toFixed(2)}
+                            </strong>
+                          </div>
+                        </>
+                      );
+                    })}
+                    {topSellingProducts.length === 0 && (
+                      <div className="invoice-empty-state">No Products</div>
+                    )}
                   </div>
                 </div>
 
@@ -708,32 +885,28 @@ const Products = () => {
                   </div>
 
                   <div className="performance-list">
-                    <div className="performance-item">
-                      <span>1</span>
-                      <div>
-                        <h5>Mi Power Bank 20000mAh</h5>
-                        <p>42 units sold</p>
-                      </div>
-                      <strong>₹79,758</strong>
-                    </div>
+                    {slowMovingProducts.map((product, index) => {
+                      return (
+                        <>
+                          <div className="performance-item" key={product._id}>
+                            <span>{index + 1}</span>
+                            <div>
+                              <h5>{product.name}</h5>
+                              <p>{product.totalSellings} units sold</p>
+                            </div>
+                            <strong>
+                              ₹
+                              {product.totalSellings *
+                                product.sellingPrice.toFixed(2)}
+                            </strong>
+                          </div>
+                        </>
+                      );
+                    })}
 
-                    <div className="performance-item">
-                      <span>2</span>
-                      <div>
-                        <h5>Surf Excel Matic Liquid</h5>
-                        <p>220 units sold</p>
-                      </div>
-                      <strong>₹1,15,500</strong>
-                    </div>
-
-                    <div className="performance-item">
-                      <span>3</span>
-                      <div>
-                        <h5>Boat Rockerz 450 Headphones</h5>
-                        <p>312 units sold</p>
-                      </div>
-                      <strong>₹4,67,688</strong>
-                    </div>
+                    {slowMovingProducts.length === 0 && (
+                      <div className="invoice-empty-state">No Products</div>
+                    )}
                   </div>
                 </div>
 
@@ -744,39 +917,61 @@ const Products = () => {
                   </div>
 
                   <div className="performance-list">
-                    <div className="performance-item">
-                      <span>1</span>
-                      <div>
-                        <h5>Mi Power Bank 20000mAh</h5>
-                        <p>42 units sold</p>
-                      </div>
-                      <strong>₹79,758</strong>
-                    </div>
+                    {deadStockProducts.map((product, index) => {
+                      return (
+                        <>
+                          <div className="performance-item" key={product._id}>
+                            <span>{index + 1}</span>
+                            <div>
+                              <h5>{product.name}</h5>
+                              <p>{product.totalSellings} units sold</p>
+                            </div>
+                            <strong>
+                              ₹
+                              {product.totalSellings *
+                                product.sellingPrice.toFixed(2)}
+                            </strong>
+                          </div>
+                        </>
+                      );
+                    })}
+
+                    {deadStockProducts.length === 0 && (
+                      <div className="invoice-empty-state">No Products</div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-            
           </div>
         </div>
-       {selectedProduct && (
-        <div className="product-drawer-overlay">
-          <div className="product-drawer">
-            <button className="drawer-close-btn" onClick={() => dispatch(clearSelectedProduct())}>×</button>
-            <div className="drawer-product-header">
-              <span className="product-avatar">
-                  {selectedProduct.name?.split(" ").map((word) => word[0]).slice(0, 2).join("").toUpperCase()}
-              </span>
-              <div>
+        {selectedProduct && (
+          <div className="product-drawer-overlay">
+            <div className="product-drawer">
+              <button
+                className="drawer-close-btn"
+                onClick={() => dispatch(clearSelectedProduct())}
+              >
+                ×
+              </button>
+              <div className="drawer-product-header">
+                <span className="product-avatar">
+                  {selectedProduct.name
+                    ?.split(" ")
+                    .map((word) => word[0])
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()}
+                </span>
+                <div>
                   <h3>{selectedProduct.name}</h3>
                   <p>
                     {selectedProduct.manufacturer || "No manufacturer"} ·{" "}
                     {selectedProduct.productCode}
                   </p>
+                </div>
               </div>
-
-            </div>
-            <p className="drawer-section-title">BASIC INFORMATION</p>
+              <p className="drawer-section-title">BASIC INFORMATION</p>
               <div className="drawer-card">
                 <div>
                   <small>Product name</small>
@@ -788,7 +983,9 @@ const Products = () => {
                 </div>
                 <div>
                   <small>Category</small>
-                  <strong>{selectedProduct.categoryId?.name || "Uncategorized"}</strong>
+                  <strong>
+                    {selectedProduct.categoryId?.name || "Uncategorized"}
+                  </strong>
                 </div>
                 <div>
                   <small>Subcategory</small>
@@ -808,163 +1005,175 @@ const Products = () => {
 
               <div className="drawer-card two-col">
                 <div>
-                    <small>Purchase price</small>
-                    <strong>₹{selectedProduct.purchasePrice}</strong>
+                  <small>Purchase price</small>
+                  <strong>₹{selectedProduct.purchasePrice}</strong>
                 </div>
                 <div>
-                    <small>Selling price</small>
-                    <strong>₹{selectedProduct.sellingPrice}</strong>
+                  <small>Selling price</small>
+                  <strong>₹{selectedProduct.sellingPrice}</strong>
                 </div>
                 <div>
-                    <small>Profit per unit</small>
-                    <strong className="profit-text">
-                        ₹{selectedProduct.sellingPrice - selectedProduct.purchasePrice}
-                    </strong>
+                  <small>Profit per unit</small>
+                  <strong className="profit-text">
+                    ₹
+                    {selectedProduct.sellingPrice -
+                      selectedProduct.purchasePrice}
+                  </strong>
                 </div>
               </div>
 
-            <p className="drawer-section-title">TAX INFORMATION</p>
+              <p className="drawer-section-title">TAX INFORMATION</p>
 
               <div className="drawer-card two-col">
                 <div>
-                    <small>HSN code</small>
-                    <strong>{selectedProduct.hsnCode || "-"}</strong>
+                  <small>HSN code</small>
+                  <strong>{selectedProduct.hsnCode || "-"}</strong>
                 </div>
                 <div>
-                    <small>GST rate</small>
-                    <strong>{selectedProduct.gstRate}%</strong>
+                  <small>GST rate</small>
+                  <strong>{selectedProduct.gstRate}%</strong>
                 </div>
               </div>
 
               <p className="drawer-section-title">INVENTORY</p>
 
-                <div className="drawer-card two-col">
-                  <div>
-                    <small>Current quantity</small>
-                    <strong>
-                      {selectedProduct.quantity} 
-                    </strong>
-                  </div>
-                  <div>
-                    <small>Unit size</small>
-                    <strong>
-                        {selectedProduct.unit} {selectedProduct.unitType}
-                    </strong>
-                  </div>
-                  <div>
-                    <small>Expiry date</small>
-                    <strong>
-                        {selectedProduct.expiry
-                            ? new Date(selectedProduct.expiry).toLocaleDateString("en-IN", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                              })
-                            : "-"}
-                    </strong>
-                  </div>
+              <div className="drawer-card two-col">
+                <div>
+                  <small>Current quantity</small>
+                  <strong>{selectedProduct.quantity}</strong>
                 </div>
+                <div>
+                  <small>Unit size</small>
+                  <strong>
+                    {selectedProduct.unit} {selectedProduct.unitType}
+                  </strong>
+                </div>
+                <div>
+                  <small>Expiry date</small>
+                  <strong>
+                    {selectedProduct.expiry
+                      ? new Date(selectedProduct.expiry).toLocaleDateString(
+                          "en-IN",
+                          {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          },
+                        )
+                      : "-"}
+                  </strong>
+                </div>
+              </div>
 
-                <div className="drawer-actions">
-                  <button className="drawer-restock-btn"  onClick={() => {
-                          setRestockModalData({
-                          quantity: "",
-                          productId: selectedProduct._id,
-                          currentQuantity: selectedProduct.quantity,
-                        });
-                        setRestockModalOpen(true)}}><RefreshCcw size={17}/>Restock</button>
-                  <button className="drawer-edit-btn" onClick={()=>navigate(`/products/edit-product/${selectedProduct._id}`)}>
-                    Edit product
+              <div className="drawer-actions">
+                <button
+                  className="drawer-restock-btn"
+                  onClick={() => {
+                    setRestockModalData({
+                      quantity: "",
+                      productId: selectedProduct._id,
+                      currentQuantity: selectedProduct.quantity,
+                    });
+                    setRestockModalOpen(true);
+                  }}
+                >
+                  <RefreshCcw size={17} />
+                  Restock
+                </button>
+                <button
+                  className="drawer-edit-btn"
+                  onClick={() =>
+                    navigate(`/products/edit-product/${selectedProduct._id}`)
+                  }
+                >
+                  Edit product
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {restockModalOpen && (
+          <div className="restock-modal-overlay">
+            <form onSubmit={handleRestockModalSubmit}>
+              <div className="restock-modal">
+                <div className="category-modal-header">
+                  <div>
+                    <p>RESTOCK</p>
+                    <h2>Restock Product</h2>
+                    <span>
+                      Update the quantity of this product in your inventory.
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="restock-modal-close"
+                    onClick={() => {
+                      setRestockModalOpen(false);
+                      dispatch(clearRestockError());
+                      setRestockModalData({
+                        quantity: "",
+                        productId: "",
+                      });
+                    }}
+                  >
+                    <X size={18} />
                   </button>
                 </div>
 
+                {restockError && (
+                  <div className="sticky-error">{restockError}</div>
+                )}
+
+                <div className="restock-modal-body">
+                  <div className="restock-field">
+                    <label>Current Quantity </label>
+                    <input
+                      type="number"
+                      value={restockModalData.currentQuantity}
+                      disabled
+                    />
+                  </div>
+
+                  <div className="restock-field">
+                    <label>Increase Quantity By *</label>
+                    <input
+                      type="number"
+                      name="quantity"
+                      placeholder="e.g. 100"
+                      value={restockModalData.quantity}
+                      onChange={handleRestockModalChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="restock-modal-footer">
+                  <button
+                    className="restock-cancel-btn"
+                    type="button"
+                    onClick={() => {
+                      // setRestockModalOpen(false);
+                      dispatch(clearRestockError());
+                      setRestockModalData({
+                        quantity: "",
+                        productId: "",
+                      });
+                    }}
+                  >
+                    Cancel
+                  </button>
+
+                  <button className="restock-save-btn" type="submit">
+                    <Plus size={18} />
+                    Restock Product
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
-        </div>
-       )}
-
-
-       {restockModalOpen && (
-       
-                
-                 <div className="restock-modal-overlay">
-                  <form onSubmit={handleRestockModalSubmit}>
-                   <div className="restock-modal">
-       
-                     <div className="category-modal-header">
-                       <div>
-                         <p>RESTOCK</p>
-                         <h2>Restock Product</h2>
-                         <span>Update the quantity of this product in your inventory.</span>
-                       </div>
-       
-                                             
-                       <button type="button" className="restock-modal-close"
-                         onClick={() => {
-                          setRestockModalOpen(false);
-                          dispatch(clearRestockError());
-                          setRestockModalData({
-                              quantity: "",
-                               productId: "",
-                        });
-                       }}
-                       >
-                         <X size={18} />
-                       </button>
-                     </div>
-       
-                     {restockError && (
-                   <div className="sticky-error">
-                       {restockError}
-                   </div>
-                 )}
-       
-                    
-                     <div className="restock-modal-body">
-
-                      <div className="restock-field">
-                           <label>Current Quantity </label>
-                               <input type="number"  value={restockModalData.currentQuantity} disabled/>
-                       </div>
-       
-                       <div className="restock-field">
-                           <label>Increase Quantity By *</label>
-                               <input type="number" name="quantity" placeholder="e.g. 100" value={restockModalData.quantity} onChange={handleRestockModalChange}/>
-                       </div>
-       
-                       
-       
-                      </div>
-       
-                     <div className="restock-modal-footer">
-       
-                       <button className="restock-cancel-btn"
-                       type="button"
-                         onClick={() => {
-                        // setRestockModalOpen(false);
-                          dispatch(clearRestockError());
-                          setRestockModalData({
-                          quantity: "",
-                            productId: "",
-                          });
-                       }}
-                       >
-                           Cancel
-                       </button>
-       
-                       <button className="restock-save-btn" type="submit">
-                             <Plus size={18} />
-                             Restock Product
-                       </button>
-       
-                     </div>
-       
-                   </div>
-                 </form> 
-               </div>
-               )}
-
+        )}
       </div>
-    
     );
 };
 

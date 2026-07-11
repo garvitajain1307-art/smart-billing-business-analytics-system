@@ -91,6 +91,10 @@ const productSchema=mongoose.Schema({
         default:0,
         min:[0,'Total Sellings cannot be negative']
     },
+    lastSoldAt: {
+        type: Date,
+        default: null
+    },
     companyId:{
     type:mongoose.Schema.Types.ObjectId,
     ref:"Company",

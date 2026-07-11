@@ -370,3 +370,44 @@ export const getLowStockProducts=asyncHandler(async(req,res,next)=>{
     });
 
 })
+
+export const getTopSellingProducts=asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+        if(!companyId){
+            return next(new ErrorHandler("Please setup your company first", 400));
+    
+        }
+    
+        const topSellingProducts=await Product.find({companyId,totalSellings:{
+             $gt: 20,
+            
+
+        }}).sort({totalSellings: -1 }).limit(4);
+        res.status(200).json({
+            success: true,
+            message: "Top Selling Products fetched successfully",
+            topSellingProducts
+        });
+
+
+})
+
+export const getSlowMovingProducts=asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+    if(!companyId){
+        return next(new ErrorHandler("Please setup your company first", 400));
+    
+    }
+    const slowMovingProducts = await Product.find({
+        companyId,totalSellings: {
+            $gt: 0,
+            $lt: 20,},
+    }).sort({ totalSellings: 1 });
+
+    res.status(200).json({
+        success: true,
+        slowMovingProducts,
+        
+    });
+
+})

@@ -235,8 +235,12 @@ export const generateInvoice=[
             {
               $inc: { quantity: -item.quantity,
                     totalSellings: item.quantity,
+                    
+
                },
+               $set:{lastSoldAt: new Date()}
             },
+            
           );
         }
 

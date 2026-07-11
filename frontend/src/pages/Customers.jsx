@@ -14,7 +14,8 @@ import {
     Trash2,
     ArrowUpRight,
     ArrowDownRight,
-    ChevronDown,Users,Calendar,Check, FileText, Download, Mail,TrendingUp,FileDown,MessageSquare,Crown,RefreshCcw,UserRoundPlus,Wallet ,ReceiptText
+    ChevronDown,Users,Calendar,Check, FileText, Download, Mail,TrendingUp,FileDown,MessageSquare,Crown,RefreshCcw,UserRoundPlus,Wallet ,ReceiptText,StarCheck, 
+
 } from "lucide-react";
 import "./Customers.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -241,7 +242,7 @@ const Customers = () => {
                 <p>Total Customers</p>
                 <h2>{customers.length}</h2>
                 <span className="invoice-green-text">
-                  <ArrowUpRight size={15} /> vs last month
+                  <Users size={15}/> Registered Customers
                 </span>
               </div>
               <div className="customer-insight-icon customer-blue-icon">
@@ -254,7 +255,7 @@ const Customers = () => {
                 <p>Repeat Customers</p>
                 <h2>{getRepeatCustomers().length}</h2>
                 <span className="customer-green-text">
-                  <ArrowUpRight size={15} /> vs last month
+                  <StarCheck size={15}/> Repeat Buyers
                 </span>
               </div>
               <div className="customer-insight-icon customer-green-icon">
@@ -267,7 +268,7 @@ const Customers = () => {
                 <p>New this month</p>
                 <h2>{getNewCustomersThisMonth().length}</h2>
                 <span className="customer-red-text">
-                  <ArrowDownRight size={15} /> vs last month
+                  <TrendingUp size={15} />Latest Customers
                 </span>
               </div>
               <div className="customer-insight-icon customer-orange-icon">
@@ -280,7 +281,7 @@ const Customers = () => {
                 <p>Revenue From Customers </p>
                 <h2>₹{totalRevenue}</h2>
                 <span className="customer-red-text">
-                  <ArrowDownRight size={15} /> vs last month
+                  <Wallet size={15}/>Customer Sales
                 </span>
               </div>
               <div className="customer-insight-icon customer-red-icon">

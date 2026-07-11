@@ -236,3 +236,18 @@
 .side-bar.collapsed {
   width: 78px;
 }
+
+.logout-link {
+    background: transparent;
+    border: none;
+    outline: none;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    cursor: pointer;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+}

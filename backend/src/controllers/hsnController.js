@@ -13,7 +13,9 @@ export const searchHsn=asyncHandler(async(req,res,next)=>{
     const hsnList=await HSNMaster.find({
         $or:[
             {hsnCode:{$regex:query,$options:"i"}},
-            {description:{$regex:query,$options:"i"}}
+            {description:{$regex:query,$options:"i"}},
+            { keywords: { $regex: query, $options: "i" } }
+            
 
         ]
     }).limit(8);

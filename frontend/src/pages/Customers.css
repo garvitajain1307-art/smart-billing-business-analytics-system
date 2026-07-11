@@ -331,8 +331,8 @@
     height: 30px;
   margin-left: auto;
   background: #dcfce7;
-  color: #059669 !important;
-  border: 1px solid green;
+  color: #059669;
+border: 1px solid #86efac;
   padding: 6px 12px;
   border-radius: 999px;
   font-size: 13px;
@@ -694,7 +694,8 @@
 
 .payment-pill {
   background: #eef2f7;
-  color: #64748b;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
   padding: 5px 10px;
   border-radius: 999px;
   font-size: 12px;
@@ -760,6 +761,10 @@
 
 .download-drawer-btn:hover {
   color: #254fc4;
+}
+
+.customer-insight-card span{
+    color: #2563EB;
 }
 
 

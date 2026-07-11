@@ -6,6 +6,7 @@ import Company from "../models/company.js";
 import Counter from "../models/counter.js";
 import Invoice from "../models/invoice.js";
 
+
 export const getDashboardSummary = asyncHandler(async (req, res, next) => {
 
     // Get company of logged in admin
@@ -515,4 +516,317 @@ export const getTopSellingProducts=asyncHandler(async(req,res,next)=>{
         });
 
 
+})
+
+export const getPaymentMethodSummary = asyncHandler(async (req, res, next) => {
+    const companyId = req.admin.companyId;
+
+    if (!companyId) {
+        return next(new ErrorHandler("Please setup your company first", 400));
+    }
+
+    const invoices = await Invoice.find({ companyId }).sort({ createdAt: -1 });
+
+    if (invoices.length === 0) {
+        return res.status(200).json({
+            success: true,
+            message: "No sales currently",
+            cashInvoicesPercent: 0,
+            upiInvoicesPercent: 0,
+            cardInvoicesPercent: 0
+        });
+    }
+
+    const cashInvoices = invoices.filter(
+        invoice => invoice.paymentMethod === "Cash"
+    );
+    const upiInvoices = invoices.filter(
+        invoice => invoice.paymentMethod === "UPI"
+    );
+    const cardInvoices = invoices.filter(
+        invoice => invoice.paymentMethod === "Card"
+    );
+
+    const cashInvoicesPercent = Number(
+        ((cashInvoices.length / invoices.length) * 100).toFixed(1)
+    );
+
+    const upiInvoicesPercent = Number(
+        ((upiInvoices.length / invoices.length) * 100).toFixed(1)
+    );
+
+    const cardInvoicesPercent = Number(
+        ((cardInvoices.length / invoices.length) * 100).toFixed(1)
+    );
+
+    res.status(200).json({
+        success: true,
+        message: "Payment trend fetched successfully",
+        cashInvoicesPercent,
+        upiInvoicesPercent,
+        cardInvoicesPercent
+    });
+});
+
+export const getBusinessInsights=asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+    if(!companyId){
+        return next(new ErrorHandler("Please setup your company first", 400));
+    
+    }
+    
+        const topProduct=await Product.findOne({companyId}).sort({totalSellings: -1 });
+
+        const invoices=await Invoice.find({companyId}).sort({ createdAt: -1 })
+         const totalRevenue = invoices.reduce((sum, invoice) => {
+                return sum + (invoice.totalAmount || 0);
+        }, 0);
+
+        const avgInvoiceValue =invoices.length > 0 ? Math.round(totalRevenue / invoices.length) : 0;
+
+        const totalGST = invoices.reduce((sum, invoice) => {
+            return sum + (invoice.gstTotal || 0);
+        }, 0);
+
+        const salesByDate = {};
+
+        invoices.forEach((invoice) => {
+          const date = new Date(invoice.createdAt).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          });
+
+          salesByDate[date] =
+            (salesByDate[date] || 0) + (invoice.totalAmount || 0);
+        });
+
+        let highestSalesDate = null;
+        let highestSalesAmount = 0;
+
+        Object.entries(salesByDate).forEach(([date, amount]) => {
+          if (amount > highestSalesAmount) {
+            highestSalesAmount = amount;
+            highestSalesDate = date;
+          }
+        });
+
+        res.status(200).json({
+          success: true,
+          topProduct,
+          avgInvoiceValue,
+          totalGST,
+          highestSalesDate,
+          highestSalesAmount,
+        });
+
+})
+
+export const getDeadStock=asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+
+    if(!companyId){
+        return next(new ErrorHandler("Pls setup your company first",400));
+
+    }
+
+    const ninetyDaysAgo=new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate()-90);
+
+    const deadStock=await Product.find({companyId, quantity:{$gt:0},$or:[{lastSoldAt:null},{lastSoldAt:{$lt:ninetyDaysAgo}}]});
+    if(deadStock.length===0){
+        return res.status(200).json({
+            success:true,
+            message:"No dead stock",
+        })
+    }
+    res.status(200).json({
+        success:true,
+        message:"Dead stock fetched successfully",
+        deadStock
+    })
+})
+
+
+export const getCustomerMix=asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+    if(!companyId){
+        return next(new ErrorHandler("Pls setup your company first",400));
+    }
+
+    const now=new Date();
+    const currentMonthStart=new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1
+    );
+
+     const nextMonthStart = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        1
+    );
+     const customers = await Customer.find({ companyId });
+
+    const totalCustomers = customers.length;
+
+    const repeatCustomers=customers.filter((customer)=>{
+        return customer.timesServed>1;
+    })
+
+    const newCustomers=customers.filter((customer)=>{
+        const createdAt = new Date(customer.createdAt);
+
+        return (
+            createdAt >= currentMonthStart &&
+            createdAt < nextMonthStart
+        );
+    })
+
+    const repeatCustomerCount = repeatCustomers.length;
+    const newCustomerCount = newCustomers.length;
+
+    const repeatCustomerPercent =
+        totalCustomers > 0
+            ? Number(
+                  (
+                      (repeatCustomerCount / totalCustomers) *
+                      100
+                  ).toFixed(1)
+              )
+            : 0;
+
+    const newCustomerPercent =
+        totalCustomers > 0
+            ? Number(
+                  (
+                      (newCustomerCount / totalCustomers) *
+                      100
+                  ).toFixed(1)
+              )
+            : 0;
+
+    res.status(200).json({
+        success: true,
+        message: "Customer mix fetched successfully",
+        repeatCustomerCount,
+        newCustomerCount,
+        repeatCustomerPercent,
+        newCustomerPercent,
+    });
+
+
+
+
+
+})
+
+export const getBusinessHealth=asyncHandler(async(req,res,next)=>{
+    const companyId=req.admin.companyId;
+    if(!companyId){
+        return next(new ErrorHandler("Pls setup your company first",400));
+    }
+
+    const products=await Product.find({companyId});
+
+    const totalProductCount=products.length;
+
+    const lowStockProducts=products.filter((product)=>{
+        return (product.quantity>0 &&
+            product.quantity<=10)
+    })
+
+    const lowStockCount=lowStockProducts.length;
+
+    const outOfStockProducts=products.filter((product)=>{
+        return product.quantity===0
+            
+    })
+
+    const outOfStockCount=outOfStockProducts.length;
+
+    const lowStockPercent =
+         totalProductCount> 0
+            ? Number(
+                  (
+                      (lowStockCount / totalProductCount) *
+                      100
+                  ).toFixed(1)
+              )
+            : 0;
+
+     const outOfStockPercent =
+         totalProductCount> 0
+            ? Number(
+                  (
+                      (outOfStockCount / totalProductCount) *
+                      100
+                  ).toFixed(1)
+              )
+            : 0;
+
+    res.status(200).json({
+        success: true,
+        message: "Business health fetched successfully",
+        totalProductCount,
+        lowStockCount,
+        outOfStockCount,
+        lowStockPercent,
+        outOfStockPercent
+    });
+
+    
+
+
+
+})
+
+export const getInventoryValue = asyncHandler(async (req, res, next) => {
+    const companyId = req.admin.companyId;
+
+    if (!companyId) {
+        return next(
+            new ErrorHandler("Please setup your company first", 400)
+        );
+    }
+
+    const products = await Product.find({ companyId });
+
+    const purchaseValue = products.reduce((sum, product) => {
+        return sum + (product.purchasePrice * product.quantity);
+    }, 0);
+
+    const sellingValue = products.reduce((sum, product) => {
+        return sum + (product.sellingPrice * product.quantity);
+    }, 0);
+
+    const expectedProfit = sellingValue - purchaseValue;
+
+    const profitMargin =
+        purchaseValue > 0
+            ? Number(
+                  (
+                      (expectedProfit / purchaseValue) *
+                      100
+                  ).toFixed(1)
+              )
+            : 0;
+
+    res.status(200).json({
+        success: true,
+        message: "Inventory value fetched successfully",
+        purchaseValue,
+        sellingValue,
+        expectedProfit,
+        profitMargin,
+    });
+});
+
+export const getAdminDetails=asyncHandler(async(req,res,next)=>{
+    const adminName=req.admin.name;
+    res.status(200).json({
+        success: true,
+        message: "Admin name fetched successfully",
+        adminName:adminName
+    });
 })

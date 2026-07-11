@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { setDeadStock } from "../dashboard/dashboardSlice";
 
 
 const productSlice=createSlice({
@@ -12,6 +13,9 @@ const productSlice=createSlice({
         success:false,
         categoryError:null,
         restockError:null,
+        topSellingProducts:[],
+        slowMovingProducts:[],
+        deadStockProducts:[],
     },
     reducers:{
         setProductLoading:(state)=>{
@@ -111,10 +115,23 @@ const productSlice=createSlice({
         },
         stopProductLoading: (state) => {
             state.loading = false;
+        },
+        setTopSellingProducts:(state,action)=>{
+            state.loading=false;
+            state.topSellingProducts=action.payload
+        },
+        setSlowMovingProducts:(state,action)=>{
+            state.loading=false;
+            state.slowMovingProducts=action.payload
+        },
+        setDeadStockProducts:(state,action)=>{
+            state.loading=false;
+            state.deadStockProducts=action.payload
+
         }
         
     }
 })
 
-export const {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading,setCategoryError,clearCategoryError,setRestockError,clearRestockError}=productSlice.actions;
+export const {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduct,addCategory,updateProduct,deleteProduct,setProductError,clearProductError,clearProductSuccess,clearSelectedProduct,stopProductLoading,setCategoryError,clearCategoryError,setRestockError,clearRestockError,setTopSellingProducts,setSlowMovingProducts,setDeadStockProducts}=productSlice.actions;
 export default productSlice.reducer;

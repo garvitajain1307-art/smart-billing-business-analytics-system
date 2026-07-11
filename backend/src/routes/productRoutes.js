@@ -1,5 +1,5 @@
 import express from "express";
-import {addProduct,getAllProducts,getProduct,deleteProduct,updateProduct,restockProduct,getLowStockProducts} from "../controllers/productController.js"
+import {addProduct,getAllProducts,getProduct,deleteProduct,updateProduct,restockProduct,getLowStockProducts,getTopSellingProducts,getSlowMovingProducts} from "../controllers/productController.js"
 import { isAuthenticated } from "../middlewares/authMiddleware.js";
 
 const router=express.Router();
@@ -11,6 +11,8 @@ router.delete("/deleteProduct/:productId",isAuthenticated,deleteProduct);
 router.put("/updateProduct/:productId",isAuthenticated,updateProduct);
 router.put("/restockProduct/:productId",isAuthenticated,restockProduct);
 router.get("/getLowStockProducts",isAuthenticated,getLowStockProducts);
+router.get("/getTopSellingProducts",isAuthenticated,getTopSellingProducts);
+router.get("/getSlowMovingProducts",isAuthenticated,getSlowMovingProducts);
 
 
 

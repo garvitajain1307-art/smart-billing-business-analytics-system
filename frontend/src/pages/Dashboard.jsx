@@ -11,16 +11,16 @@ import {
   TrendingDown,FileDown,Smartphone,CreditCard, Plus,
   PackagePlus,
   UserPlus,
-  PackageSearch,
+  PackageSearch,Zap,ArchiveX, Package,CircleCheck,ArrowUpRight,Activity,TriangleAlert,PackageX,CircleX,Boxes,Percent
 } from "lucide-react";
 
-import {LineChart,Line,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,} from "recharts"
+import {LineChart,Line,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,PieChart, Pie, Cell,} from "recharts"
 
 import Sidebar from "../components/Sidebar";
 import "./Dashboard.css";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {setDashboardLoading,setDashboardError,clearDashboardError,setLowStockProducts,setDashboardSummary,setSalesTrend,setRecentInvoices,setTopSellingProducts}from "../features/dashboard/dashboardSlice"
+import {setDashboardLoading,setDashboardError,clearDashboardError,setLowStockProducts,setDashboardSummary,setSalesTrend,setRecentInvoices,setTopSellingProducts,setPaymentMethodSummary, setBusinessInsights,setDeadStock,setCustomerMix,setBusinessHealth,setInventoryValue,setAdminName}from "../features/dashboard/dashboardSlice"
 import { NavLink, useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
@@ -33,17 +33,89 @@ const Dashboard = () => {
         { label: "This Month", value: "month" },
     ];
 
-    const salesData = [
-      { label: "Jul 1", revenue: 38000 },
-      { label: "Jul 2", revenue: 42000 },
-      { label: "Jul 3", revenue: 35000 },
-      { label: "Jul 4", revenue: 51000 },
-    ];
+     
 
-     const { loading, error,lowStockProducts,lowStockCount,summary,salesTrend,recentInvoices,topSellingProducts} = useSelector((state) => state.dashboard);
+     const { loading, error,lowStockProducts,lowStockCount,summary,salesTrend,recentInvoices,topSellingProducts,paymentMethodSummary,businessInsights,deadStock,customerMix,businessHealth,inventoryValue,adminName} = useSelector((state) => state.dashboard);
 
      const dispatch=useDispatch();
      const navigate=useNavigate();
+
+     const paymentData = [
+       {
+         name: "UPI",
+         value: paymentMethodSummary.upi || 0,
+         color: "#2563eb",
+       },
+       {
+         name: "Card",
+         value: paymentMethodSummary.card || 0,
+         color: "#5fd0ad",
+       },
+       {
+         name: "Cash",
+         value: paymentMethodSummary.cash || 0,
+         color: "#f9bd5c",
+       },
+     ];
+
+
+    const hasPaymentData = paymentData.some((item) => item.value > 0);
+
+
+    const paymentMethods = [
+        {
+            name: "UPI",
+            value: paymentMethodSummary?.upi || 0,
+        },
+        {
+            name: "Card",
+            value: paymentMethodSummary?.card || 0,
+        },
+        {
+            name: "Cash",
+            value: paymentMethodSummary?.cash || 0,
+        },
+    ];
+
+    const topPaymentMethod = paymentMethods.reduce((top, current) => {
+        return current.value > top.value ? current : top;
+    }, paymentMethods[0]);
+
+    
+    const formatDate = (date) => {
+        if (!date) return "No sales yet";
+
+        return new Date(date).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
+    };
+    const {
+      repeatCustomerCount = 0,
+      newCustomerCount = 0,
+      repeatCustomerPercent = 0,
+      newCustomerPercent = 0,
+    } = customerMix || {};
+
+    const {
+      totalProductCount = 0,
+      lowStockCount2 = 0,
+      outOfStockCount = 0,
+      lowStockPercent = 0,
+      outOfStockPercent = 0,
+    } = businessHealth || {};
+
+    const healthyStockCount = Math.max(
+      totalProductCount - lowStockCount2 - outOfStockCount,
+      0,
+    );
+
+    const healthyStockPercent =
+      totalProductCount > 0
+        ? Number(((healthyStockCount / totalProductCount) * 100).toFixed(1))
+        : 0;
+
 
      const getComparisonText = (type, data) => {
        if (type === "percentage") {
@@ -64,7 +136,12 @@ const Dashboard = () => {
 
        return "vs previous month";
      };
-
+     const {
+        purchaseValue = 0,
+        sellingValue = 0,
+        expectedProfit = 0,
+        profitMargin = 0,
+    } = inventoryValue || {};
     const fetchLowStockProducts = async () => {
             try {
                 dispatch(setDashboardLoading());
@@ -87,6 +164,91 @@ const Dashboard = () => {
                 dispatch(setDashboardError(err.message));
             }
         };
+
+        const fetchAdminDetails=async()=>{
+          try{
+            dispatch(setDashboardLoading());
+
+            const res = await fetch(
+              "http://localhost:4000/api/v1/dashboard/getAdminDetails",
+              {
+                credentials: "include",
+              },
+            );
+
+            const data = await res.json();
+
+            if (!data.success) {
+              dispatch(setDashboardError("Error while fetching admin name"));
+              
+              
+              return;
+            }
+
+            dispatch(
+              setAdminName(data.adminName),
+            );
+
+          }catch(err){
+            dispatch(setDashboardError("Error while fetching admin name"));
+
+          }
+        }
+        const fetchInventoryValue = async () => {
+          try {
+            dispatch(setDashboardLoading());
+
+            const res = await fetch(
+              "http://localhost:4000/api/v1/dashboard/getInventoryValue",
+              {
+                credentials: "include",
+              },
+            );
+
+            const data = await res.json();
+
+            if (!data.success) {
+              dispatch(setDashboardError(data.message));
+              return;
+            }
+
+            dispatch(
+              setInventoryValue({
+                purchaseValue: data.purchaseValue,
+                sellingValue: data.sellingValue,
+                expectedProfit: data.expectedProfit,
+                profitMargin: data.profitMargin,
+              }),
+            );
+          } catch (error) {
+            dispatch(setDashboardError(error.message));
+          }
+        };
+        const fetchBusinessInsights=async()=>{
+          try{
+            dispatch(setDashboardLoading());
+
+            const res=await fetch("http://localhost:4000/api/v1/dashboard/getBusinessInsights",{
+              credentials:"include",
+            })
+
+            const data=await res.json();
+
+            if(!data.success){
+              dispatch(setDashboardError("Error while fetching business insights"));
+            }
+            dispatch(setBusinessInsights({
+              topProduct: data.topProduct,
+              avgInvoiceValue: data.avgInvoiceValue,
+              totalGST: data.totalGST,
+              highestSalesDate: data.highestSalesDate,
+              highestSalesAmount: data.highestSalesAmount,
+            }))
+          }catch(err){
+            dispatch(setDashboardError("Error while fetching business insights"));
+
+          }
+        }
         const fetchRecentInvoices = async () => {
             try {
                 dispatch(setDashboardLoading());
@@ -109,6 +271,90 @@ const Dashboard = () => {
                 dispatch(setDashboardError(err.message));
             }
         };
+
+        const fetchCustomerMix = async () => {
+          try {
+            dispatch(setDashboardLoading());
+
+            const res = await fetch(
+              "http://localhost:4000/api/v1/dashboard/getCustomerMix",
+              {
+                credentials: "include",
+              },
+            );
+
+            const data = await res.json();
+
+            if (!data.success) {
+              dispatch(setDashboardError(data.message));
+              return;
+            }
+
+            dispatch(
+              setCustomerMix({
+                repeatCustomerCount: data.repeatCustomerCount,
+                newCustomerCount: data.newCustomerCount,
+                repeatCustomerPercent: data.repeatCustomerPercent,
+                newCustomerPercent: data.newCustomerPercent,
+              }),
+            );
+          } catch (error) {
+            dispatch(setDashboardError(error.message));
+          }
+        };
+
+        const fetchDeadStock = async () => {
+          try {
+            dispatch(setDashboardLoading());
+
+            const res = await fetch(
+              "http://localhost:4000/api/v1/dashboard/getDeadStock",
+              {
+                credentials: "include",
+              },
+            );
+
+            const data = await res.json();
+
+            if (!data.success) {
+              dispatch(setDashboardError("Error while fetching the data"));
+            }
+
+            dispatch(setDeadStock(data.deadStock));
+          } catch (err) {
+            dispatch(setDashboardError("Error while fetching the data"));
+          }
+        };
+
+        const fetchPaymentMethodSummary=async()=>{
+          try {
+                dispatch(setDashboardLoading());
+                
+    
+                const res = await fetch(
+                    "http://localhost:4000/api/v1/dashboard/getPaymentMethodSummary",
+                    {
+                        credentials: "include",
+                    }
+                );
+                const data = await res.json();
+                if (!data.success) {
+                    dispatch(setDashboardError(data.message));
+                    return;
+                }
+                dispatch(
+                    setPaymentMethodSummary({
+                        cash: data.cashInvoicesPercent,
+                        upi: data.upiInvoicesPercent,
+                        card: data.cardInvoicesPercent,
+                    })
+                );
+                
+            } catch (err) {
+                dispatch(setDashboardError(err.message));
+            }
+
+        }
         
         const fetchTopSellingProducts = async () => {
             try {
@@ -182,7 +428,45 @@ const Dashboard = () => {
               }
             };
 
+            const fetchBusinessHealth = async () => {
+              try {
+                dispatch(setDashboardLoading());
+
+                const res = await fetch(
+                "http://localhost:4000/api/v1/dashboard/getBusinessHealth",
+                  {
+                    credentials: "include",
+                  },
+                );
+                const data = await res.json();
+                if (!data.success) {
+                  dispatch(
+                    setDashboardError(data.message || "Failed to get Sales Trend"),
+                  );
+                  return;
+                }
+                dispatch(
+                  setBusinessHealth({
+                    totalProductCount: data.totalProductCount,
+                    lowStockCount2: data.lowStockCount,
+                    outOfStockCount: data.outOfStockCount,
+                    lowStockPercent: data.lowStockPercent,
+                    outOfStockPercent: data.outOfStockPercent,
+                  }),
+                );
+              } catch (err) {
+                dispatch(setDashboardError("Failed to get Sales Trend"));
+              }
+            };
+
         useEffect(()=>{
+          fetchAdminDetails(),
+          fetchInventoryValue(),
+          fetchBusinessHealth(),
+          fetchCustomerMix(),
+          fetchDeadStock(),
+          fetchBusinessInsights(),
+          fetchPaymentMethodSummary(),
           fetchTopSellingProducts(),
           fetchRecentInvoices(),
             fetchSalesTrend(),
@@ -207,10 +491,10 @@ const Dashboard = () => {
           </div>
 
           <div className="dashboard-navbar-right">
-            <div className="dashboard-search">
+            {/* <div className="dashboard-search">
               <Search size={17} />
               <input type="text" placeholder="Search invoices, products..." />
-            </div>
+            </div> */}
 
             <button className="dashboard-icon-btn">
               <Bell size={18} />
@@ -265,7 +549,7 @@ const Dashboard = () => {
               )}
             </div>
 
-            <div className="dashboard-avatar">RK</div>
+            <div className="dashboard-avatar">{adminName.split(" ").map((word)=>word[0]).slice(0,2).join("").toUpperCase()}</div>
           </div>
         </div>
 
@@ -293,7 +577,7 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                <button type="button" className="dashboard-view-alerts-btn">
+                <button type="button" className="dashboard-view-alerts-btn" onClick={()=>navigate("/products")}>
                   View All Alerts
                   <ArrowRight size={14} />
                 </button>
@@ -821,15 +1105,9 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Bottom Cards */}
+             
 
-              <div className="dashboard-bottom-cards">
-                <div className="dashboard-customer-mix-card"></div>
-
-                <div className="dashboard-inventory-health-card"></div>
-
-                <div className="dashboard-monthly-revenue-card"></div>
-              </div>
+              
             </div>
 
             {/* RIGHT COLUMN */}
@@ -881,17 +1159,413 @@ const Dashboard = () => {
 
               {/* Payment Distribution */}
 
-              <div className="dashboard-payment-card"></div>
+              <div className="dashboard-payment-card">
+                <div className="payment-distribution-header">
+                  <h3>Payment Distribution</h3>
+                  <p>Share by payment method</p>
+                </div>
+
+                <div className="payment-chart-container">
+                  {hasPaymentData ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Tooltip
+                          formatter={(value) => [`${value}%`, "Percentage"]}
+                          contentStyle={{
+                            borderRadius: "10px",
+                            border: "1px solid #e5e7eb",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                            fontSize: "13px",
+                          }}
+                          cursor={false}
+                        />
+                        <Pie
+                          data={paymentData}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={53}
+                          outerRadius={76}
+                          paddingAngle={1}
+                          stroke="#ffffff"
+                          strokeWidth={2}
+                          startAngle={90}
+                          endAngle={-270}
+                        >
+                          {paymentData.map((entry) => (
+                            <Cell key={entry.name} fill={entry.color} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="payment-empty-chart">
+                      <div className="payment-empty-donut"></div>
+                      <p>No payment data yet</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="payment-distribution-legend">
+                  {paymentData.map((item) => (
+                    <div className="payment-legend-item" key={item.name}>
+                      <span
+                        className="payment-legend-dot"
+                        style={{ backgroundColor: item.color }}
+                      ></span>
+
+                      <span className="payment-legend-name">{item.name}</span>
+
+                      <span className="payment-legend-value">
+                        {Number(item.value).toFixed(1)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               {/* Business Insights */}
 
-              <div className="dashboard-business-insights-card"></div>
+              <div className="dashboard-business-insights-card">
+                <div className="business-insights-title">
+                  <Zap size={17} fill="currentColor" />
+                  <h3>Business Insights</h3>
+                </div>
+
+                <div className="business-insights-list">
+                  <div className="business-insight-row">
+                    <span className="business-insight-label">
+                      Highest Sales Date
+                    </span>
+
+                    <span className="business-insight-value">
+                      {businessInsights?.highestSalesDate}
+                    </span>
+                  </div>
+
+                  <div className="business-insight-row">
+                    <span className="business-insight-label">
+                      Best-Selling Product
+                    </span>
+
+                    <span className="business-insight-value">
+                      {businessInsights?.topProduct?.name || "No product yet"}
+                    </span>
+                  </div>
+
+                  <div className="business-insight-row">
+                    <span className="business-insight-label">
+                      Avg Order Value
+                    </span>
+
+                    <span className="business-insight-value">
+                      {businessInsights?.avgInvoiceValue}
+                    </span>
+                  </div>
+
+                  <div className="business-insight-row">
+                    <span className="business-insight-label">
+                      Top Payment Method
+                    </span>
+
+                    <span className="business-insight-value">
+                      {topPaymentMethod.value > 0
+                        ? `${topPaymentMethod.name} (${topPaymentMethod.value.toFixed(1)}%)`
+                        : "No payments yet"}
+                    </span>
+                  </div>
+
+                  <div className="business-insight-row">
+                    <span className="business-insight-label">
+                      GST Collected
+                    </span>
+
+                    <span className="business-insight-value">
+                      {businessInsights?.totalGST.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
               {/* Dead Stock */}
 
-              <div className="dashboard-dead-stock-card"></div>
+              <div className="dashboard-dead-stock-card">
+                <div className="dead-stock-header">
+                  <div className="dead-stock-heading">
+                    <ArchiveX size={17} />
+                    <h3>Dead Stock</h3>
+                  </div>
+
+                  <span className="dead-stock-count">
+                    {deadStock?.length || 0} items
+                  </span>
+                </div>
+
+                <div className="dead-stock-list">
+                  {deadStock?.length > 0 ? (
+                    deadStock.slice(0, 4).map((product) => (
+                      <div className="dead-stock-item" key={product._id}>
+                        <div className="dead-stock-product-info">
+                          <h4>{product.name}</h4>
+
+                          <p>Last sold: {formatDate(product.lastSoldAt)}</p>
+                        </div>
+
+                        <span className="dead-stock-quantity">
+                          {product.quantity} left
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="dead-stock-empty">
+                      <Package size={28} />
+                      <p>No dead stock found</p>
+                    </div>
+                  )}
+                </div>
+
+                <NavLink to="/products" className="dead-stock-view-link">
+                  <Package size={15} />
+                  View Inventory
+                </NavLink>
+              </div>
             </div>
           </div>
+          {/* =================================================
+    BOTTOM ANALYTICS CARDS
+================================================= */}
+
+<div className="dashboard-bottom-cards">
+
+    {/* ================= CUSTOMER MIX ================= */}
+
+    <div className="dashboard-customer-mix-card">
+        <div className="customer-mix-header">
+            <h3>Customer Mix</h3>
+            <p>Repeat vs. new customers</p>
+        </div>
+
+        <div className="customer-mix-progress-section">
+            <div className="customer-mix-progress-item">
+                <div className="customer-mix-progress-heading">
+                    <span>Repeat Customers</span>
+
+                    <strong className="customer-repeat-percentage">
+                        {repeatCustomerPercent}%
+                    </strong>
+                </div>
+
+                <div className="customer-mix-progress-track">
+                    <div
+                        className="customer-mix-progress-fill customer-repeat-fill"
+                        style={{
+                            width: `${Math.min(repeatCustomerPercent, 100)}%`,
+                        }}
+                    />
+                </div>
+            </div>
+
+            <div className="customer-mix-progress-item">
+                <div className="customer-mix-progress-heading">
+                    <span>New Customers</span>
+
+                    <strong className="customer-new-percentage">
+                        {newCustomerPercent}%
+                    </strong>
+                </div>
+
+                <div className="customer-mix-progress-track">
+                    <div
+                        className="customer-mix-progress-fill customer-new-fill"
+                        style={{
+                            width: `${Math.min(newCustomerPercent, 100)}%`,
+                        }}
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div className="customer-mix-statistics">
+            <div className="customer-mix-stat-box">
+                <div className="customer-mix-stat-icon repeat-stat-icon">
+                    <CircleCheck size={15} />
+                </div>
+
+                <div className="customer-mix-stat-content">
+                    <strong>{repeatCustomerCount}</strong>
+                    <span>Repeat Customers</span>
+                </div>
+            </div>
+
+            <div className="customer-mix-stat-box">
+                <div className="customer-mix-stat-icon new-stat-icon">
+                    <ArrowUpRight size={15} />
+                </div>
+
+                <div className="customer-mix-stat-content">
+                    <strong>{newCustomerCount}</strong>
+                    <span>New This Month</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {/* ================= INVENTORY HEALTH ================= */}
+
+    <div className="dashboard-inventory-health-card">
+        <div className="inventory-health-header">
+            <h3>Inventory Health</h3>
+            <p>Stock status overview</p>
+        </div>
+
+        <div className="inventory-health-grid">
+            <div className="inventory-health-stat total-products-stat">
+                <Package size={18} />
+                <strong>{totalProductCount}</strong>
+                <span>Total Products</span>
+            </div>
+
+            <div className="inventory-health-stat healthy-stock-stat">
+                <CircleCheck size={18} />
+                <strong>{healthyStockCount}</strong>
+                <span>Healthy Stock</span>
+            </div>
+
+            <div className="inventory-health-stat low-stock-stat">
+                <TriangleAlert size={18} />
+                <strong>{lowStockCount2}</strong>
+                <span>Low Stock</span>
+            </div>
+
+            <div className="inventory-health-stat out-stock-stat">
+                <CircleX size={18} />
+                <strong>{outOfStockCount}</strong>
+                <span>Out of Stock</span>
+            </div>
+        </div>
+
+        <div className="inventory-health-bar">
+            {healthyStockPercent > 0 && (
+                <div
+                    className="inventory-health-bar-part healthy-bar-part"
+                    style={{ width: `${healthyStockPercent}%` }}
+                />
+            )}
+
+            {lowStockPercent > 0 && (
+                <div
+                    className="inventory-health-bar-part low-bar-part"
+                    style={{ width: `${lowStockPercent}%` }}
+                />
+            )}
+
+            {outOfStockPercent > 0 && (
+                <div
+                    className="inventory-health-bar-part out-bar-part"
+                    style={{ width: `${outOfStockPercent}%` }}
+                />
+            )}
+        </div>
+
+        <div className="inventory-health-legend">
+            <div className="inventory-health-legend-item">
+                <span className="inventory-health-dot healthy-dot" />
+                <p>Healthy {healthyStockPercent}%</p>
+            </div>
+
+            <div className="inventory-health-legend-item">
+                <span className="inventory-health-dot low-dot" />
+                <p>Low {lowStockPercent}%</p>
+            </div>
+
+            <div className="inventory-health-legend-item">
+                <span className="inventory-health-dot out-dot" />
+                <p>Out {outOfStockPercent}%</p>
+            </div>
+        </div>
+    </div>
+
+    {/* ================= INVENTORY VALUE ================= */}
+
+    <div className="dashboard-inventory-value-card">
+        <div className="inventory-value-header">
+            <div>
+                <h3>Inventory Value</h3>
+                <p>Current value of available stock</p>
+            </div>
+
+            <div className="inventory-value-header-icon">
+                <Boxes size={18} />
+            </div>
+        </div>
+
+        <div className="inventory-value-grid">
+            <div className="inventory-value-box purchase-value-box">
+                <div className="inventory-value-icon purchase-value-icon">
+                    <IndianRupee size={17} />
+                </div>
+
+                <div className="inventory-value-content">
+                    <span>Purchase Value</span>
+                    <strong>
+                        ₹{Number(purchaseValue || 0).toLocaleString("en-IN")}
+                    </strong>
+                </div>
+            </div>
+
+            <div className="inventory-value-box selling-value-box">
+                <div className="inventory-value-icon selling-value-icon">
+                    <TrendingUp size={17} />
+                </div>
+
+                <div className="inventory-value-content">
+                    <span>Selling Value</span>
+                    <strong>
+                        ₹{Number(sellingValue || 0).toLocaleString("en-IN")}
+                    </strong>
+                </div>
+            </div>
+
+            <div className="inventory-value-box profit-value-box">
+                <div className="inventory-value-icon profit-value-icon">
+                    <TrendingUp size={17} />
+                </div>
+
+                <div className="inventory-value-content">
+                    <span>Expected Profit</span>
+                    <strong>
+                        ₹{Number(expectedProfit || 0).toLocaleString("en-IN")}
+                    </strong>
+                </div>
+            </div>
+
+            <div className="inventory-value-box margin-value-box">
+                <div className="inventory-value-icon margin-value-icon">
+                    <Percent size={17} />
+                </div>
+
+                <div className="inventory-value-content">
+                    <span>Profit Margin</span>
+                    <strong>{Number(profitMargin || 0).toFixed(1)}%</strong>
+                </div>
+            </div>
+        </div>
+
+        <div className="inventory-value-summary">
+            <div className="inventory-value-summary-text">
+                <span>Potential Stock Profit</span>
+                <strong>
+                    ₹{Number(expectedProfit || 0).toLocaleString("en-IN")}
+                </strong>
+            </div>
+
+            <div className="inventory-value-summary-badge">
+                {Number(profitMargin || 0).toFixed(1)}% margin
+            </div>
+        </div>
+    </div>
+</div>
         </div>
       </div>
     </div>
