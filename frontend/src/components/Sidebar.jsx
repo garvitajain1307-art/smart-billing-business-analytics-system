@@ -158,10 +158,10 @@ const Sidebar = ({ extended, setExtended }) => {
                 )}
               </NavLink>
 
-              <NavLink to="/settings" className="sidebar-item">
+              {/* <NavLink to="/settings" className="sidebar-item">
                 <Settings size={18} />
                 <span>Settings</span>
-              </NavLink>
+              </NavLink> */}
             </div>
           ) : (
             <div className="sidebar-btns">
@@ -197,9 +197,9 @@ const Sidebar = ({ extended, setExtended }) => {
                 </div>
               </NavLink>
 
-              <NavLink to="/settings" className="sidebar-item">
+              {/* <NavLink to="/settings" className="sidebar-item">
                 <Settings size={18} />
-              </NavLink>
+              </NavLink> */}
             </div>
           )}
         </div>

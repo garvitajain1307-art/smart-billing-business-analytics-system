@@ -7,7 +7,8 @@ import Company from "../models/company.js";
 import Counter from "../models/counter.js";
 import Invoice from "../models/invoice.js";
 import Notification from "../models/notification.js";
-import {generatePDF} from "../utils/generatePDF.js"
+import {generatePDF} from "../utils/generatePDF.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 import { uploadPdfToCloudinary } from "../utils/uploadPdfToCloudinary.js";
 
@@ -32,6 +33,8 @@ export const generateInvoice=[
     .withMessage("Customer phone is required")
     .matches(/^[0-9]{10}$/)
     .withMessage("Please enter a valid 10-digit phone number"),
+
+    
 
     asyncHandler(async(req,res,next)=>{
         const errors=validationResult(req);
@@ -63,13 +66,20 @@ export const generateInvoice=[
             phone: company.phone,
             email: company.email,
             gstNo: company.gstNo,
+
         }
 
 
         //CUSTOMER DETAILS
 
-        const { customerId, customerName, customerPhone, paymentMethod, items } = req.body;
-       
+        const { customerId, customerName, customerPhone,customerEmail, paymentMethod, items } = req.body;
+       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+       if (customerEmail && !emailRegex.test(customerEmail.trim())) {
+         return next(
+           new ErrorHandler("Please enter a valid email address", 400),
+         );
+       }
         let customer=null;
         //if admin selects from dropdown
         if(customerId){
@@ -305,10 +315,64 @@ export const generateInvoice=[
         }
         );
 
+        let emailSent = false;
+
+if (customerEmail?.trim()) {
+  try {
+    await sendEmail({
+      email: customerEmail.trim(),
+      subject: `Your Invoice ${invoice.invoiceNo}`,
+      html: `
+        <h2>
+          Thank you for shopping with
+          ${invoice.companyDetails.companyName}
+        </h2>
+
+        <p>
+          Hello ${invoice.customerDetails.name || "Customer"},
+        </p>
+
+        <p>Your invoice has been generated successfully.</p>
+
+        <p>
+          <strong>Invoice Number:</strong>
+          ${invoice.invoiceNo}
+        </p>
+
+        <p>
+          <strong>Total Amount:</strong>
+          ₹${invoice.totalAmount}
+        </p>
+
+        <p>
+          <strong>Payment Method:</strong>
+          ${invoice.paymentMethod}
+        </p>
+
+        <p>Please find your invoice attached to this email.</p>
+      `,
+      attachments: [
+        {
+          filename: `${invoice.invoiceNo}.pdf`,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    emailSent = true;
+
+    
+  } catch (error) {
+    console.error("Invoice email failed:", error.message);
+  }
+}
+
         return res.status(201).json({
             success: true,
             message: "Invoice generated successfully",
             invoice,
+            emailSent,
         });
         
         
@@ -339,6 +403,7 @@ export const getNextInvoiceNo=asyncHandler(async(req,res,next)=>{
         success: true,
     
         invoiceNo,
+        
     });
 })
 

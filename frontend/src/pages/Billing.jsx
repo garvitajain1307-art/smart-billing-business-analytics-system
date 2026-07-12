@@ -26,7 +26,8 @@ import {setProductLoading,setProducts,setCategories,setSelectedProduct,addProduc
 import {setBillingLoading,addToCart,removeFromCart, increaseQuantity,decreaseQuantity,clearCart,setCustomer,clearCustomer,setPaymentMethod,setDiscount,setBillingError,clearBillingError,setGeneratedInvoice,clearGeneratedInvoice} from "../features/billing/billingSlice"
 const Billing = () => {
     const [extended, setExtended] = useState(false);
-    const [search,setSearch]=useState("")
+    const [search,setSearch]=useState("");
+    const [customerEmail, setCustomerEmail] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All categories");
     const [selectedStock, setSelectedStock] = useState("All Stock");
     const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -137,10 +138,18 @@ const Billing = () => {
       const handleGenerateInvoice=async()=>{
         try{
           dispatch(setBillingLoading());
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+          if (customerEmail.trim() && !emailRegex.test(customerEmail.trim())) {
+            dispatch(setBillingError("Pls enter a valid email address"));
+            return;
+          }
+
           const invoiceData={
             customerId:customer.customerId,
             customerName:customer.name,
             customerPhone:customer.phone,
+            customerEmail: customerEmail.trim(),
             paymentMethod:paymentMethod,
             items:cart.map((item)=>({
               productId:item._id,
@@ -173,6 +182,7 @@ const Billing = () => {
               fetchProducts();
               fetchNextInvoiceNo();
               dispatch(setPaymentMethod("Cash"));
+              setCustomerEmail("");
               
 
               
@@ -527,6 +537,18 @@ const Billing = () => {
                 Customer not found. Add as a new customer or continue as
                 walk-in.
               </p> */}
+              <div className="customer-email-field">
+                <div className="customer-input-wrapper">
+                  <Mail size={22} />
+
+                  <input
+                    type="email"
+                    placeholder="Email (optional)"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="current-bill">

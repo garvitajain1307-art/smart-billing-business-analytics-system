@@ -564,10 +564,10 @@ const Invoices = () => {
                 }}><FileDown size={17} /><span>Download</span></button>
               </div>
 
-              <div className="drawer-actions-two">
+              {/* <div className="drawer-actions-two">
                 <button type="button"><MessageSquare size={17}/><span>Send SMS</span></button>
                 
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
