@@ -6,6 +6,7 @@ import billingReducer from "../features/billing/billingSlice"
 import invoiceReducer from "../features/invoices/invoiceSlice"
 import customerReducer from "../features/customers/customerSlice"
 import dashboardReducer from "../features/dashboard/dashboardSlice"
+import notificationReducer from "../features/notification/notificationSlice"
 
 
 export const store=configureStore({
@@ -16,7 +17,8 @@ export const store=configureStore({
         billing:billingReducer,
         invoice:invoiceReducer,
         customer:customerReducer,
-        dashboard:dashboardReducer
+        dashboard:dashboardReducer,
+        notification:notificationReducer,
 
     }
 })

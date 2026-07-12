@@ -109,6 +109,7 @@ const AuthPage=()=>{
         }
 
         dispatch(setAdmin(data.admin));
+        
 
         setLoginData({
             email: "",

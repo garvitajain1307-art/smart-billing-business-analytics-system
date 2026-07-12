@@ -305,7 +305,7 @@ const Billing = () => {
                 dispatch(clearCustomer());
                 dispatch(clearBillingError());
                 dispatch(clearGeneratedInvoice());
-                dispatch(setPaymentMethod("Cash")); 
+                dispatch(setPaymentMethod("Cash"));
               }}
             >
               <ReceiptText size={15} /> New Invoice
@@ -317,10 +317,10 @@ const Billing = () => {
               </button>
             </NavLink>
 
-            <button type="button">
+            {/* <button type="button">
               <TrendingUp size={15} /> Today's Sales
-            </button>
-            <Bell size={20} className="bell-icon" />
+            </button> */}
+            {/* <Bell size={20} className="bell-icon" /> */}
           </div>
         </header>
 
@@ -648,8 +648,8 @@ const Billing = () => {
               </div>
 
               <div className="preview-footer">
-                <span>INV-2024-0285</span>
-                <span>21 Jun 2026</span>
+                <span>{invoiceNo}</span>
+                <span>{today}</span>
               </div>
             </div>
 
@@ -712,11 +712,23 @@ const Billing = () => {
               <h3>INVOICE ACTIONS</h3>
 
               <button
-                className={`generate-btn ${cart.length === 0 ? "disabled-invoice" : ""}`}
-                disabled={cart.length === 0}
+                className={`generate-btn ${
+                  cart.length === 0 ? "disabled-invoice" : ""
+                }`}
+                disabled={cart.length === 0 || loading}
                 onClick={handleGenerateInvoice}
               >
-                <ReceiptText size={16} /> Generate Invoice
+                {loading ? (
+                  <>
+                    <div className="btn-spinner"></div>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <ReceiptText size={16} />
+                    Generate Invoice
+                  </>
+                )}
               </button>
 
               <div
@@ -737,11 +749,10 @@ const Billing = () => {
               </div>
               <div></div>
               <NavLink to="/invoices">
-              <button className="print-btn">
-                <Eye size={15} /> <span>View all Invoices</span>
-              </button>
-            </NavLink>
-              
+                <button className="print-btn">
+                  <Eye size={15} /> <span>View all Invoices</span>
+                </button>
+              </NavLink>
             </div>
           </aside>
         </section>

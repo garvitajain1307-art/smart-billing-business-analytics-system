@@ -251,3 +251,44 @@
     color: inherit;
     font: inherit;
 }
+
+.sidebar-notification-icon{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.sidebar-unread-dot{
+    position:absolute;
+    top:-2px;
+    right:-3px;
+
+    width:8px;
+    height:8px;
+
+    border-radius:50%;
+    background:#ef4444;
+    /* border:2px solid #ffffff; */
+}
+
+.sidebar-unread-count{
+    margin-left:auto;
+
+    min-width:22px;
+    height:22px;
+
+    padding:0 6px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:999px;
+
+    background:#ef4444;
+    color:#ffffff;
+
+    font-size:11px;
+    font-weight:700;
+}

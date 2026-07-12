@@ -6,6 +6,7 @@ import Product from "../models/product.js";
 import Company from "../models/company.js";
 import Counter from "../models/counter.js";
 import Invoice from "../models/invoice.js";
+import Notification from "../models/notification.js";
 import {generatePDF} from "../utils/generatePDF.js"
 
 import { uploadPdfToCloudinary } from "../utils/uploadPdfToCloudinary.js";
@@ -226,11 +227,19 @@ export const generateInvoice=[
         invoice.pdfPublicId = cloudinaryResult.public_id;
 
         await invoice.save();
+        await Notification.create({
+          companyId,
+          adminId: req.admin._id,
+          invoiceId: invoice._id,
+          type: "invoice_generated",
+          title: "Invoice Generated",
+          message: `Invoice ${invoice.invoiceNo} for ₹${invoice.totalAmount} was generated successfully.`,
+        });
 
         //UPDATE STOCK
 
         for (const item of items) {
-          await Product.findOneAndUpdate(
+         const updatedProduct= await Product.findOneAndUpdate(
             { _id: item.productId, companyId },
             {
               $inc: { quantity: -item.quantity,
@@ -240,8 +249,45 @@ export const generateInvoice=[
                },
                $set:{lastSoldAt: new Date()}
             },
+
+            {new : true},
             
           );
+
+          if(!updatedProduct){
+            continue;
+          }
+          if(updatedProduct.quantity===0){
+            const existingNotification=await Notification.findOne({ companyId,productId:updatedProduct._id,type:"out_of_stock",isResolved: false,});
+            if(!existingNotification){
+                await Notification.create({
+                    companyId,
+                    adminId: req.admin._id,
+                    productId: updatedProduct._id,
+                    invoiceId: invoice._id,
+                    type: "out_of_stock",
+                    title: "Product Out of Stock",
+                    message: `${updatedProduct.name} is now out of stock`,
+            });
+
+            }
+            
+          }else if(updatedProduct.quantity>0 && updatedProduct.quantity<=10){
+            const existingNotification=await Notification.findOne({ companyId,productId:updatedProduct._id,type:"low_stock",isResolved: false,});
+            if(!existingNotification){
+                await Notification.create({
+                    companyId,
+                    adminId: req.admin._id,
+                    productId: updatedProduct._id,
+                    invoiceId: invoice._id,
+                    type: "low_stock",
+                    title: "Low Stock Alert",
+                    message: `${updatedProduct.name} has only ${updatedProduct.quantity} units left`,
+            });
+
+            }
+            
+          }
         }
 
         //UPDATE CUSTOMER DETAILS

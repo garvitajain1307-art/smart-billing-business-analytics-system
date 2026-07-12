@@ -5,12 +5,14 @@ import "./Sidebar.css";
 import { useState,useEffect } from "react";
 import {setLoading,setAdmin,setError,logoutAdmin,clearError} from "../features/auth/authSlice"
 import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 
 const Sidebar = ({ extended, setExtended }) => {
 
     const [adminName,setAdminName]=useState("");
     const [err,setError]=useState(null);
+    const unreadCount = useSelector((state) => state.notification.unreadCount);
 
     const navigate=useNavigate();
     const dispatch=useDispatch();
@@ -133,9 +135,27 @@ const Sidebar = ({ extended, setExtended }) => {
                 <span>Invoices</span>
               </NavLink>
 
-              <NavLink to="/notifications" className="sidebar-item">
-                <Bell size={18} />
-                <span>Notifications</span>
+              <NavLink
+                to="/notifications"
+                className="sidebar-item sidebar-link"
+              >
+                <div className="sidebar-notification-icon">
+                  <Bell size={20} />
+
+                  {unreadCount > 0 && <span className="sidebar-unread-dot" />}
+                </div>
+
+                {extended && (
+                  <>
+                    <span>Notifications</span>
+
+                    {unreadCount > 0 && (
+                      <span className="sidebar-unread-count">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    )}
+                  </>
+                )}
               </NavLink>
 
               <NavLink to="/settings" className="sidebar-item">
@@ -170,7 +190,11 @@ const Sidebar = ({ extended, setExtended }) => {
                         </NavLink> */}
 
               <NavLink to="/notifications" className="sidebar-item">
-                <Bell size={18} />
+                <div className="sidebar-notification-icon">
+                  <Bell size={20} />
+
+                  {unreadCount > 0 && <span className="sidebar-unread-dot" />}
+                </div>
               </NavLink>
 
               <NavLink to="/settings" className="sidebar-item">
@@ -183,9 +207,14 @@ const Sidebar = ({ extended, setExtended }) => {
           {extended ? (
             <>
               <div className="profile-sec">
-                <div className="initials">RK</div>
+                <div className="initials">{adminName
+                    .split(" ")
+                    .map((word) => word[0])
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()}</div>
                 <div className="profile-info">
-                  <h3>Rajesh Kumar</h3>
+                  <h3>{adminName.toUpperCase()}</h3>
                   <p>Administrator</p>
                 </div>
               </div>
