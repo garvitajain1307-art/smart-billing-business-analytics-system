@@ -648,7 +648,7 @@ const AddProduct = () => {
                 <div className="inventory-value-box">
                   <p>CURRENT INVENTORY VALUE</p>
                   <h3>₹{currInvVal.toFixed(2)}</h3>
-                  <span>Enter quantity and purchase price</span>
+                  {currInvVal===0 && (<span>Enter quantity and purchase price</span>)}
                 </div>
               </section>
 

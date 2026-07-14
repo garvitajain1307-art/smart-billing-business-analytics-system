@@ -357,30 +357,30 @@ body {
 }
 
 .inventory-value-box {
-  margin: 0 22px 22px;
+  /* margin: 0 22px 22px; */
   background: #eaf0ff;
   border: 1px solid #c8d7ff;
   border-radius: 13px;
-  padding: 15px 16px;
+  /* padding: 15px 16px; */
 }
 
 .inventory-value-box p {
-  margin: 0 0 7px;
+  /* margin: 0 0 7px; */
   font-size: 11px;
   color: #4f74ff;
   font-weight: 600;
 }
 
 .inventory-value-box h3 {
-  margin: 0;
+  /* margin: 0; */
   font-size: 21px;
   color: #2563eb;
   font-weight: 650;
 }
 
 .inventory-value-box span {
-  display: block;
-  margin-top: 5px;
+  /* display: block;
+  margin-top: 5px; */
   font-size: 12px;
   color: #4f74ff;
 }
@@ -900,4 +900,25 @@ textarea:disabled {
     cursor: pointer;
     color: #2563eb;
     transform: translateX(-3px);
+}
+
+.inventory-value-box{
+  display: flex;
+  align-items: center;
+  /* justify-content: center; */
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding:20px;
+  margin:5px;
+  gap:3px;
+}
+
+.inventory-value-box p{
+  margin-top:10px;
+  margin-bottom: 3px;
+}
+.inventory-value-box h3{
+  margin-top: 0px;
+  padding-top: 0px;
 }

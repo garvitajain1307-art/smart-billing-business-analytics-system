@@ -645,7 +645,7 @@
     width: 430px;
     max-width: 100%;
     height: 100vh;
-    overflow-y: auto;
+    
     background: #f8fafc;
     padding: 30px;
     position: relative;
@@ -888,6 +888,10 @@
 
 .invoice-insight-card span{
    color: #D97706;
+}
+
+.invoice-orange-icon{
+    font-size:24px;
 }
 
 

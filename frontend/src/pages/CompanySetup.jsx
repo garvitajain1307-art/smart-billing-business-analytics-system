@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {useDispatch,useSelector} from "react-redux"
 import {setCompanyLoading,setCompany,setCompanyError,clearCompanyError,clearCompany} from "../features/company/companySlice"
-import { ReceiptText, Building2, User, Hash, Mail, Phone, MapPin, ChevronRight } from "lucide-react";
+import { ReceiptText, Building2, User, Hash, Mail, Phone, MapPin, ChevronRight,ReceiptIndianRupee  } from "lucide-react";
 import { setAdmin } from "../features/auth/authSlice";
 
 import {useNavigate} from "react-router-dom"
@@ -75,7 +75,7 @@ const CompanySetup = () => {
         <div className="setup-page">
             <div className="setup-topbar">
                 <div className="setup-brand">
-                    <div className="brand-icon"><ReceiptText size={16}/></div>
+                    <div className="brand-icon"><ReceiptIndianRupee size={16} /></div>
                     <span>Smart Billing</span>
                 </div>
                 <p>Setup · Step 1 of 1</p>
@@ -104,7 +104,7 @@ const CompanySetup = () => {
                         </div>
 
                         <div className="setup-input-box">
-                            <label><Hash size={13}/> GST Number <span>(optional)</span></label>
+                            <label><Hash size={13}/> GST Number </label>
                             <input type="text" name="gstNo" placeholder="22AAAAA0000A1Z5" value={companyData.gstNo} onChange={handleChange}/>
                         </div>
                     </div>

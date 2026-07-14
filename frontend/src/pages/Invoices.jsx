@@ -14,7 +14,8 @@ import {
     Trash2,
     ArrowUpRight,
     ArrowDownRight,
-    ChevronDown,Users,Calendar,Check, FileText, Download, Mail,TrendingUp,FileDown,MessageSquare,ReceiptText,CircleDollarSign,ShoppingCart ,ChartColumn 
+    ChevronDown,Users,Calendar,Check, FileText, Download, Mail,TrendingUp,FileDown,MessageSquare,ReceiptText,CircleDollarSign,ShoppingCart ,ChartColumn, 
+    Wallet
 } from "lucide-react";
 import "./Invoices.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -261,11 +262,12 @@ const Invoices = () => {
                 </span>
               </div>
               <div className="invoice-insight-icon invoice-orange-icon">
-                <AlertTriangle size={24} />
+                ₹
               </div>
             </div>
 
             <div className="invoice-insight-card">
+              
               <div>
                 <p>Avg Invoice Value</p>
                 <h2>₹{avgInvoiceValue.toFixed(2)}</h2>
@@ -274,7 +276,7 @@ const Invoices = () => {
                 </span>
               </div>
               <div className="invoice-insight-icon invoice-red-icon">
-                <PackageX size={24} />
+                <Wallet size={24} />
               </div>
             </div>
           </div>
@@ -404,7 +406,7 @@ const Invoices = () => {
                 )}
               </div>
             </div>
-            <div className="invoice-recent-activity">
+            {/* <div className="invoice-recent-activity">
               <div className="activity-header">
                 <div>
                   <div className="recent-activity-header">
@@ -446,7 +448,7 @@ const Invoices = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

@@ -134,7 +134,7 @@ export const deleteCustomer =asyncHandler(async(req,res,next)=>{
 
     }
     const customer=Customer.findOne({_id:customerId,companyId:companyId});
-    if(!icustomer){
+    if(!customer){
         return next(new ErrorHandler("Customer not found", 400));
 
     }
