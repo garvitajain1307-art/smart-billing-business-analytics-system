@@ -148,7 +148,7 @@ const Dashboard = () => {
                 
     
                 const res = await fetch(
-                    "http://localhost:4000/api/v1/products/getLowStockProducts",
+                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/products/getLowStockProducts`,
                     {
                         credentials: "include",
                     }
@@ -170,7 +170,7 @@ const Dashboard = () => {
             dispatch(setDashboardLoading());
 
             const res = await fetch(
-              "http://localhost:4000/api/v1/dashboard/getAdminDetails",
+              `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getAdminDetails`,
               {
                 credentials: "include",
               },
@@ -199,7 +199,7 @@ const Dashboard = () => {
             dispatch(setDashboardLoading());
 
             const res = await fetch(
-              "http://localhost:4000/api/v1/dashboard/getInventoryValue",
+              `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getInventoryValue`,
               {
                 credentials: "include",
               },
@@ -228,7 +228,7 @@ const Dashboard = () => {
           try{
             dispatch(setDashboardLoading());
 
-            const res=await fetch("http://localhost:4000/api/v1/dashboard/getBusinessInsights",{
+            const res=await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getBusinessInsights`,{
               credentials:"include",
             })
 
@@ -255,7 +255,7 @@ const Dashboard = () => {
                 
     
                 const res = await fetch(
-                    "http://localhost:4000/api/v1/dashboard/getRecentInvoices",
+                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getRecentInvoices`,
                     {
                         credentials: "include",
                     }
@@ -277,7 +277,7 @@ const Dashboard = () => {
             dispatch(setDashboardLoading());
 
             const res = await fetch(
-              "http://localhost:4000/api/v1/dashboard/getCustomerMix",
+              `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getCustomerMix`,
               {
                 credentials: "include",
               },
@@ -308,7 +308,7 @@ const Dashboard = () => {
             dispatch(setDashboardLoading());
 
             const res = await fetch(
-              "http://localhost:4000/api/v1/dashboard/getDeadStock",
+              `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getDeadStock`,
               {
                 credentials: "include",
               },
@@ -332,7 +332,7 @@ const Dashboard = () => {
                 
     
                 const res = await fetch(
-                    "http://localhost:4000/api/v1/dashboard/getPaymentMethodSummary",
+                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getPaymentMethodSummary`,
                     {
                         credentials: "include",
                     }
@@ -362,7 +362,7 @@ const Dashboard = () => {
                 
     
                 const res = await fetch(
-                    "http://localhost:4000/api/v1/dashboard/getTopSellingProducts",
+                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getTopSellingProducts`,
                     {
                         credentials: "include",
                     }
@@ -386,7 +386,7 @@ const Dashboard = () => {
         
                   const res = await fetch(
                     
-                    `http://localhost:4000/api/v1/dashboard/getDashboardSummary?period=${value}`,
+                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getDashboardSummary?period=${value}`,
                     {
                       credentials: "include",
                     }
@@ -410,7 +410,7 @@ const Dashboard = () => {
                 dispatch(setDashboardLoading());
 
                 const res = await fetch(
-                "http://localhost:4000/api/v1/dashboard/getSalesTrend",
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getSalesTrend`,
                   {
                     credentials: "include",
                   },
@@ -433,7 +433,7 @@ const Dashboard = () => {
                 dispatch(setDashboardLoading());
 
                 const res = await fetch(
-                "http://localhost:4000/api/v1/dashboard/getBusinessHealth",
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getBusinessHealth`,
                   {
                     credentials: "include",
                   },

@@ -55,7 +55,7 @@ const Products = () => {
             dispatch(setProductLoading());
 
             const res = await fetch(
-                "http://localhost:4000/api/v1/products/getAllProducts",
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/products/getAllProducts`,
                 {
                     credentials: "include",
                 }
@@ -78,7 +78,7 @@ const Products = () => {
             
 
             const res = await fetch(
-                "http://localhost:4000/api/v1/category/getAllCategories",
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/category/getAllCategories`,
                 {
                     credentials: "include",
                 }
@@ -98,7 +98,7 @@ const Products = () => {
          dispatch(setProductLoading());
 
          const res = await fetch(
-           "http://localhost:4000/api/v1/dashboard/getDeadStock",
+           `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getDeadStock`,
            {
              credentials: "include",
            },
@@ -125,7 +125,7 @@ const Products = () => {
         dispatch(setProductLoading());
 
         const res = await fetch(
-          "http://localhost:4000/api/v1/products/getTopSellingProducts",
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/products/getTopSellingProducts`,
           {
             credentials: "include",
           },
@@ -145,7 +145,7 @@ const Products = () => {
         dispatch(setProductLoading());
 
         const res = await fetch(
-          "http://localhost:4000/api/v1/products/getSlowMovingProducts",
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/products/getSlowMovingProducts`,
           {
             credentials: "include",
           },
@@ -237,7 +237,7 @@ const Products = () => {
                 
                 dispatch(setProductLoading());
           
-                  const res = await fetch(`http://localhost:4000/api/v1/products/restockProduct/${restockModalData.productId}`, {
+                  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/products/restockProduct/${restockModalData.productId}`, {
                       method: "PUT",
                       headers: {
                           "Content-Type": "application/json"
@@ -299,7 +299,7 @@ const Products = () => {
             
 
             const res = await fetch(
-                `http://localhost:4000/api/v1/products/deleteProduct/${productId}`,
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/products/deleteProduct/${productId}`,
                 {
                   method: "DELETE",
                   credentials: "include",

@@ -59,7 +59,7 @@ const AddProduct = () => {
               
   
               const res = await fetch(
-                  "http://localhost:4000/api/v1/category/getAllCategories",
+                  `${import.meta.env.VITE_BACKEND_URL}/api/v1/category/getAllCategories`,
                   {
                       credentials: "include",
                   }
@@ -91,7 +91,7 @@ const AddProduct = () => {
 
           const res = await fetch(
             
-            `http://localhost:4000/api/v1/hsn/searchHsn?query=${value}`,
+            `${import.meta.env.VITE_BACKEND_URL}/api/v1/hsn/searchHsn?query=${value}`,
             {
               credentials: "include",
             }
@@ -169,7 +169,7 @@ const AddProduct = () => {
           
             dispatch(setProductLoading());
     
-            const res = await fetch("http://localhost:4000/api/v1/products/addProduct", {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/products/addProduct`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -259,7 +259,7 @@ const AddProduct = () => {
           
             dispatch(setProductLoading());
     
-            const res = await fetch("http://localhost:4000/api/v1/category/addCategory", {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/category/addCategory`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

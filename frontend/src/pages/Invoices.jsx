@@ -50,7 +50,7 @@ const Invoices = () => {
       dispatch(setInvoiceLoading());
 
       const res = await fetch(
-        "http://localhost:4000/api/v1/invoice/getAllInvoices",
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/invoice/getAllInvoices`,
         {
           credentials: "include",
         },
@@ -78,7 +78,7 @@ const Invoices = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:4000/api/v1/invoice/deleteInvoice/${invoiceId}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/invoice/deleteInvoice/${invoiceId}`,
         {
           method: "DELETE",
           credentials: "include",

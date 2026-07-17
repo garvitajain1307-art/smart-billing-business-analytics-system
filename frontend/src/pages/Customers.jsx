@@ -42,7 +42,7 @@ const Customers = () => {
       dispatch(setCustomerLoading());
 
       const res = await fetch(
-        "http://localhost:4000/api/v1/customer/getAllCustomers",
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/customer/getAllCustomers`,
         {
           credentials: "include",
         },
@@ -70,7 +70,7 @@ const Customers = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:4000/api/v1/customer/deleteCustomer/${customerId}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/customer/deleteCustomer/${customerId}`,
           {
             method: "DELETE",
             credentials: "include",
@@ -93,7 +93,7 @@ const Customers = () => {
 
     try{
       dispatch(setCustomerLoading());
-      const res=await fetch(`http://localhost:4000/api/v1/customer/getCustomerDetails/${customer._id}`,
+      const res=await fetch(`h${import.meta.env.VITE_BACKEND_URL}/api/v1/customer/getCustomerDetails/${customer._id}`,
         {
           method:"GET",
           credentials:"include"

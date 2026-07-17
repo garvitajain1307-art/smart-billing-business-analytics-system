@@ -47,7 +47,7 @@ const AuthPage=()=>{
     try {
         dispatch(setLoading());
 
-        const res = await fetch("http://localhost:4000/api/v1/admin/register", {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -87,7 +87,7 @@ const AuthPage=()=>{
     try {
         dispatch(setLoading());
 
-        const res = await fetch("http://localhost:4000/api/v1/admin/login", {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

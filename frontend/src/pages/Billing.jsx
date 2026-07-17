@@ -68,7 +68,7 @@ const Billing = () => {
         try{
           
 
-          const res = await fetch("http://localhost:4000/api/v1/invoice/getNextInvoiceNo",
+          const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/invoice/getNextInvoiceNo`,
             {
               credentials: "include",
             }
@@ -91,7 +91,7 @@ const Billing = () => {
               dispatch(setProductLoading());
   
               const res = await fetch(
-                  "http://localhost:4000/api/v1/products/getAllProducts",
+                  `${import.meta.env.VITE_BACKEND_URL}/api/v1/products/getAllProducts`,
                   {
                       credentials: "include",
                   }
@@ -114,7 +114,7 @@ const Billing = () => {
               
   
               const res = await fetch(
-                  "http://localhost:4000/api/v1/category/getAllCategories",
+                  `${import.meta.env.VITE_BACKEND_URL}/api/v1/category/getAllCategories`,
                   {
                       credentials: "include",
                   }
@@ -157,7 +157,7 @@ const Billing = () => {
             }))
           };
 
-          const res = await fetch("http://localhost:4000/api/v1/invoice/generateInvoice",{
+          const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/invoice/generateInvoice`,{
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json"
@@ -174,7 +174,7 @@ const Billing = () => {
               console.log("Generated invoice:", data.invoice);
               dispatch(setGeneratedInvoice(data.invoice));
               window.open(
-                `http://localhost:4000/api/v1/invoice/downloadInvoicePDF/${data.invoice._id}`,
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/invoice/downloadInvoicePDF/${data.invoice._id}`,
                 "_blank"
               );
               dispatch(clearCart());
@@ -251,7 +251,7 @@ const Billing = () => {
 
           const res = await fetch(
             
-            `http://localhost:4000/api/v1/customer/searchCustomer?query=${value}`,
+            `${import.meta.env.VITE_BACKEND_URL}/api/v1/customer/searchCustomer?query=${value}`,
             {
               credentials: "include",
             }

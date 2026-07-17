@@ -10,7 +10,7 @@ await import("./src/config/cloudinary.js");
 const { default: app } = await import("./src/app.js");
 
 
-connectDb()
+await connectDb()
 
 
 const PORT=process.env.PORT || 4000;

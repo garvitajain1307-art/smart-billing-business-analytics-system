@@ -29,7 +29,7 @@ function App() {
         const getMe = async () => {
             try {
                 const res = await fetch(
-                    "http://localhost:4000/api/v1/admin/getme",
+                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/getme`,
                     {
                         credentials: "include",
                     }

@@ -26,7 +26,7 @@ const Sidebar = ({ extended, setExtended }) => {
                
     
                 const res = await fetch(
-                  "http://localhost:4000/api/v1/dashboard/getAdminDetails",
+                  `${import.meta.env.VITE_BACKEND_URL}/api/v1/dashboard/getAdminDetails`,
                   {
                     credentials: "include",
                   },
@@ -50,7 +50,7 @@ const Sidebar = ({ extended, setExtended }) => {
 
     const handleLogoutBtn = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/v1/admin/logout", {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/admin/logout`, {
           method: "GET",
           credentials: "include",
         });

@@ -179,7 +179,7 @@ const Notifications=()=>{
         try{
             dispatch(setNotificationLoading());
 
-            const res=await fetch("http://localhost:4000/api/v1/notification/getAllNotifications",{
+            const res=await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/notification/getAllNotifications`,{
                 credentials:"include"
             })
 
@@ -208,7 +208,7 @@ const Notifications=()=>{
         try{
              dispatch(setNotificationLoading());
 
-            const res=await fetch(`http://localhost:4000/api/v1/notification/markRead/${notificationId}`,{
+            const res=await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/notification/markRead/${notificationId}`,{
                  method: "PUT",
                 credentials:"include"
             })
@@ -234,7 +234,7 @@ const Notifications=()=>{
         dispatch(setNotificationLoading());
 
         const res = await fetch(
-          "http://localhost:4000/api/v1/notification/markAllRead",
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/notification/markAllRead`,
           {
             method: "PUT",
             credentials: "include",

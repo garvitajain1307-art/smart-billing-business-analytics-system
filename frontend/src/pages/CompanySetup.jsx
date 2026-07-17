@@ -30,7 +30,7 @@ const CompanySetup = () => {
         try {
             dispatch(setCompanyLoading());
         
-            const res = await fetch("http://localhost:4000/api/v1/company/registerCompany", {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/company/registerCompany`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"

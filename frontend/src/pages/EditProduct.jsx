@@ -57,7 +57,7 @@ const EditProduct = () => {
 
     const fetchProduct=async ()=>{
         try{
-            const res=await fetch(`http://localhost:4000/api/v1/products/getProduct/${productId}`,
+            const res=await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/products/getProduct/${productId}`,
             {
                 credentials: "include",
             }
@@ -100,7 +100,7 @@ const EditProduct = () => {
               
   
               const res = await fetch(
-                  "http://localhost:4000/api/v1/category/getAllCategories",
+                  `${import.meta.env.VITE_BACKEND_URL}/api/v1/category/getAllCategories`,
                   {
                       credentials: "include",
                   }
@@ -132,7 +132,7 @@ const EditProduct = () => {
 
           const res = await fetch(
             
-            `http://localhost:4000/api/v1/hsn/searchHsn?query=${value}`,
+            `${import.meta.env.VITE_BACKEND_URL}/api/v1/hsn/searchHsn?query=${value}`,
             {
               credentials: "include",
             }
@@ -211,7 +211,7 @@ const EditProduct = () => {
           
             dispatch(setProductLoading());
     
-            const res = await fetch(`http://localhost:4000/api/v1/products/updateProduct/${productId}`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/products/updateProduct/${productId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -296,7 +296,7 @@ const EditProduct = () => {
           
             dispatch(setProductLoading());
     
-            const res = await fetch("http://localhost:4000/api/v1/category/addCategory", {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/category/addCategory`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
