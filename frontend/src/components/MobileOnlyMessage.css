@@ -1,0 +1,41 @@
+.desktop-only-page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f8fafc;
+    padding:20px;
+}
+
+.desktop-card{
+    max-width:550px;
+    width:100%;
+    background:white;
+    border-radius:20px;
+    padding:45px;
+    text-align:center;
+    box-shadow:0 10px 35px rgba(0,0,0,.08);
+}
+
+.desktop-card svg{
+    color:#2563eb;
+    margin-bottom:20px;
+}
+
+.desktop-card h1{
+    margin-bottom:18px;
+    color:#0f172a;
+}
+
+.desktop-card p{
+    color:#475569;
+    line-height:1.7;
+    margin-bottom:12px;
+}
+
+.desktop-card span{
+    display:block;
+    margin-top:20px;
+    color:#2563eb;
+    font-weight:600;
+}

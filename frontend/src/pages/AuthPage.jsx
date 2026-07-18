@@ -4,6 +4,7 @@ import {ReceiptIndianRupee,FileText,ChartColumn,ShoppingCart,TrendingUp } from "
 import {useDispatch,useSelector} from "react-redux"
 import {useNavigate} from "react-router-dom"
 import {setLoading,setAdmin,setError,logoutAdmin,clearError} from "../features/auth/authSlice"
+import MobileOnlyMessage from "../components/MobileOnlyMessage";
 
 
 const AuthPage=()=>{
@@ -11,6 +12,21 @@ const AuthPage=()=>{
     const navigate = useNavigate();
     const {error,loading}=useSelector((state)=>state.auth)
     const [isSignup,setIsSignup]=useState(true);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+      const handleResize = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+
+      window.addEventListener("resize", handleResize);
+
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+if (isMobile) {
+    return <MobileOnlyMessage />;
+}
     const [signupData, setSignupData] = useState({
       name: "",
       email: "",
