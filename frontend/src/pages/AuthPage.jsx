@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import "./AuthPage.css";
 import {ReceiptIndianRupee,FileText,ChartColumn,ShoppingCart,TrendingUp } from "lucide-react"
 import {useDispatch,useSelector} from "react-redux"
