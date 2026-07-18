@@ -8,7 +8,7 @@ import Analytics from './pages/Analytics';
 import AuthPage from './pages/AuthPage'
 import Billing from './pages/Billing';
 import CompanySetup from './pages/CompanySetup'
-import CompanySetupSuccess from './pages/CompanySetUpSuccess'
+import CompanySetUpSuccess from './pages/CompanySetUpSuccess'
 import Customers from './pages/Customers';
 import Dashboard from './pages/Dashboard';
 import Invoices from './pages/Invoices';
