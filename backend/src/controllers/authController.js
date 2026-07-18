@@ -127,17 +127,20 @@ export const login=[
 
 ]
 
-export const logout=asyncHandler(async(req,res,next)=>{
-    res.status(200).cookie("token","", {
-        expires:new Date(Date.now()),
-        httpOnly:true
-    }).json({
-        success:true,
-        message:"Logged out successfully",
+export const logout = asyncHandler(async (req, res, next) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
+  });
 
-    })
-    
-})
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+});
+
 
 export const getAdmin = asyncHandler(async (req, res, next) => {
     const admin = req.admin;
