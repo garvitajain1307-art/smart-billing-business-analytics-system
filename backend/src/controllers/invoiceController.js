@@ -323,31 +323,15 @@ if (customerEmail?.trim()) {
       email: customerEmail.trim(),
       subject: `Your Invoice ${invoice.invoiceNo}`,
       html: `
-        <h2>
-          Thank you for shopping with
-          ${invoice.companyDetails.companyName}
-        </h2>
+        <h2>Thank you for shopping with ${invoice.companyDetails.companyName}</h2>
 
-        <p>
-          Hello ${invoice.customerDetails.name || "Customer"},
-        </p>
+        <p>Hello ${invoice.customerDetails.name || "Customer"},</p>
 
         <p>Your invoice has been generated successfully.</p>
 
-        <p>
-          <strong>Invoice Number:</strong>
-          ${invoice.invoiceNo}
-        </p>
-
-        <p>
-          <strong>Total Amount:</strong>
-          ₹${invoice.totalAmount}
-        </p>
-
-        <p>
-          <strong>Payment Method:</strong>
-          ${invoice.paymentMethod}
-        </p>
+        <p><strong>Invoice Number:</strong> ${invoice.invoiceNo}</p>
+        <p><strong>Total Amount:</strong> ₹${invoice.totalAmount}</p>
+        <p><strong>Payment Method:</strong> ${invoice.paymentMethod}</p>
 
         <p>Please find your invoice attached to this email.</p>
       `,
@@ -361,10 +345,12 @@ if (customerEmail?.trim()) {
     });
 
     emailSent = true;
-
-    
   } catch (error) {
-    console.error("Invoice email failed:", error.message);
+    console.error("Invoice email failed:", {
+      message: error.message,
+      code: error.code,
+      response: error.response,
+    });
   }
 }
 
