@@ -31,7 +31,12 @@ export const sendEmail = async ({
     attachments,
   });
 
-  console.log("Email sent:", info.messageId);
+  console.log("EMAIL RESULT", {
+    accepted: info.accepted,
+    rejected: info.rejected,
+    response: info.response,
+    messageId: info.messageId,
+  });
 
   return info;
 };

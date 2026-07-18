@@ -348,7 +348,7 @@ if (customerEmail?.trim()) {
 
     emailSent = true;
   } catch (error) {
-    console.error("Invoice email failed:", {
+    console.log("Invoice email failed:", {
       message: error.message,
       code: error.code,
       response: error.response,
