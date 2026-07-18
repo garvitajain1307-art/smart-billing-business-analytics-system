@@ -315,6 +315,8 @@ export const generateInvoice=[
         }
         );
 
+        console.log("Customer email received:", customerEmail);
+
         let emailSent = false;
 
 if (customerEmail?.trim()) {
