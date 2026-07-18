@@ -26,8 +26,10 @@ export const generatePDF = async (invoice) => {
 
     // Load HTML into browser
     await page.setContent(html, {
-        waitUntil: "networkidle0",
+      waitUntil: "domcontentloaded",
+      timeout: 60000,
     });
+    
     await page.addStyleTag({
         path: path.join(__dirname, "../../public/invoice.css"),
     });
