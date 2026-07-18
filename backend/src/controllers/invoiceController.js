@@ -320,8 +320,9 @@ export const generateInvoice=[
         let emailSent = false;
 
 if (customerEmail?.trim()) {
+  console.log("ABOUT TO SEND EMAIL to:", customerEmail.trim());
   try {
-    await sendEmail({
+    const result = await sendEmail({
       email: customerEmail.trim(),
       subject: `Your Invoice ${invoice.invoiceNo}`,
       html: `
@@ -346,15 +347,22 @@ if (customerEmail?.trim()) {
       ],
     });
 
+    console.log("EMAIL SEND SUCCEEDED:", result?.messageId);
     emailSent = true;
   } catch (error) {
-    console.log("Invoice email failed:", {
+    console.log("EMAIL SEND THREW ERROR:", {
       message: error.message,
       code: error.code,
       response: error.response,
+      command: error.command,
+      stack: error.stack,
     });
   }
+} else {
+  console.log("NO customerEmail provided, skipping email send. Value was:", customerEmail);
 }
+
+console.log("REACHED END OF HANDLER, about to send response");
 
         return res.status(201).json({
             success: true,
