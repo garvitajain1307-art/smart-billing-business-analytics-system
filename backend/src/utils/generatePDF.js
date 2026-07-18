@@ -17,7 +17,8 @@ export const generatePDF = async (invoice) => {
 
     // opens hidden Chrome.
     const browser = await puppeteer.launch({
-        headless: true,
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     //prints that HTML as PDF.
