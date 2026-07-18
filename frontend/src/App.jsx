@@ -8,7 +8,7 @@ import Analytics from './pages/Analytics';
 import AuthPage from './pages/AuthPage'
 import Billing from './pages/Billing';
 import CompanySetup from './pages/CompanySetup'
-import CompanySetUpSuccess from './pages/CompanySetUpSuccess'
+import CompanySetupSuccess from './pages/CompanySetupSuccess'
 import Customers from './pages/Customers';
 import Dashboard from './pages/Dashboard';
 import Invoices from './pages/Invoices';
@@ -58,7 +58,7 @@ function App() {
   path="/company/setup"
   element={!isAuthenticated ? <Navigate to="/" /> : <CompanySetup />}
 />
-      <Route path="/company/setup/success" element={!isAuthenticated ? <Navigate to="/" /> : <CompanySetUpSuccess />}/>
+      <Route path="/company/setup/success" element={!isAuthenticated ? <Navigate to="/" /> : <CompanySetpSuccess />}/>
       <Route path="/dashboard" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Dashboard/>}/> 
       <Route path="/billing" element={!isAuthenticated ? <Navigate to="/"/> : !admin?.companyId ? <Navigate to="/company/setup"/> : <Billing/>}/>
  
