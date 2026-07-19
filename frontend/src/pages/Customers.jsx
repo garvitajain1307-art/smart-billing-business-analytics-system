@@ -82,7 +82,7 @@ const Customers = () => {
           return;
         }
 
-        dispatch(removeCustomerFromState(invoiceId));
+        dispatch(removeCustomerFromState(customerId));
       } catch (error) {
         dispatch(setCustomerError(error.message));
       }
