@@ -93,7 +93,7 @@ const Customers = () => {
 
     try{
       dispatch(setCustomerLoading());
-      const res=await fetch(`h${import.meta.env.VITE_BACKEND_URL}/api/v1/customer/getCustomerDetails/${customer._id}`,
+      const res=await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/customer/getCustomerDetails/${customer._id}`,
         {
           method:"GET",
           credentials:"include"
