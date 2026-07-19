@@ -344,8 +344,6 @@ npm run dev
 
 - 🤖 AI-powered Sales Forecasting
 - 📷 Barcode Scanner Integration
-- 🏬 Multi-store Management
-- 👥 Multi-admin Support
 - 🚚 Supplier Management
 - 💰 Expense Tracking
 - 🔮 Generative AI Business Insights
