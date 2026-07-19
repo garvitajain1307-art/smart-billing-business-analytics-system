@@ -315,7 +315,7 @@ const Customers = () => {
                       <th>PHONE</th>
                       <th>TIMES SERVED</th>
                       <th>REVENUE</th>
-                      <th>LAST PURCHASE</th>
+                      <th>CUSTOMER SINCE</th>
                       <th>STATUS</th>
                       <th>ACTIONS</th>
                     </tr>
@@ -366,21 +366,34 @@ const Customers = () => {
                             ₹{customer.totalRevenue || 0}
                           </td>
 
-                          <td className="customer-lastPurchase">11 Jun 2026</td>
+                          <td className="customer-lastPurchase">
+                            {new Date(customer.createdAt).toLocaleDateString(
+                              "en-GB",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )}
+                          </td>
 
-                          
-
-                          <td >{customer.timesServed >= 10? (
-                <span className="customer-vip-badge">♛ VIP Customer</span>
-              ):(<span className="customer-Status">REGULAR</span>)}</td>
+                          <td>
+                            {customer.timesServed >= 10 ? (
+                              <span className="customer-vip-badge">
+                                ♛ VIP Customer
+                              </span>
+                            ) : (
+                              <span className="customer-Status">REGULAR</span>
+                            )}
+                          </td>
 
                           <td>
                             <div className="customer-action-icons">
                               <Eye
                                 size={17}
                                 className="eye-icon"
-                                onClick={() =>
-                                  handleCustomerClick(customer)
+                                onClick={
+                                  () => handleCustomerClick(customer)
                                   // dispatch(setSelectedCustomer(customer))}
                                 }
                               />
