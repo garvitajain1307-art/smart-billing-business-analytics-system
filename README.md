@@ -10,11 +10,12 @@ The platform automates invoice generation, GST calculation, inventory tracking, 
 
 - 🚀 End-to-end Point of Sale (POS) system built using the MERN stack
 - 🧾 Automated GST-compliant invoice generation with HSN code integration
-- 📦 Real-time inventory management with intelligent stock monitoring
-- 📄 Professional PDF invoice generation with Cloudinary storage and email delivery
+- 📦 Intelligent inventory management with automatic stock updates, low-stock alerts, and     dead-stock detection
+- 📄 PDF invoice generation with Cloudinary storage and automated pdf delivery via Resend
 - 📊 Interactive analytics dashboard with revenue, profit, inventory, and customer insights
 - 🔐 Secure JWT authentication using HTTP-only cookies
 - ⚡ Responsive UI powered by React, Redux Toolkit, and RESTful APIs
+- ☁️ Fully deployed MERN application with cloud-hosted backend and frontend
 
 ---
 
@@ -37,7 +38,7 @@ The platform automates invoice generation, GST calculation, inventory tracking, 
 - Download invoices anytime
 - Secure cloud-based PDF storage using Cloudinary
 - View complete invoice history
-- Email invoices directly to customers
+- Instantly email PDF invoices to customers using Resend
 - Invoice PDF generation using Puppeteer and EJS templates
 
 ---
@@ -140,10 +141,11 @@ The platform automates invoice generation, GST calculation, inventory tracking, 
 - MongoDB
 - Mongoose
 - JSON Web Token (JWT)
+- JWT Authentication
 - bcrypt
 - Cookie Parser
 - Express Validator
-- Nodemailer
+- Nodemailer/Resend
 - Puppeteer
 - EJS
 - Cloudinary
@@ -202,6 +204,15 @@ Smart-Billing-System/
 ```
 
 > **Note:** The `.env` file is excluded from version control and must be created manually.
+
+---
+
+# 🌐 Live Demo
+
+Frontend:
+https://smart-billing-business-analytics-sy.vercel.app
+Backend API:
+https://smart-billing-business-analytics-system.onrender.com
 
 ---
 
@@ -280,6 +291,8 @@ npm install
 Create a **backend/.env** file and add the following variables:
 
 ```env
+
+
 PORT=
 
 MONGO_URI=
@@ -288,12 +301,21 @@ JWT_SECRET=
 
 FRONTEND_URL=
 
+RESEND_API_KEY=
+EMAIL_FROM=
+
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
+```
 
-EMAIL_USER=
-EMAIL_PASS=
+Create a **frontend/.env** file and add the following variables:
+
+```env
+
+
+VITE_BACKEND_URL=
+
 ```
 
 ---
@@ -346,7 +368,3 @@ If you found this project helpful, please consider giving it a **⭐ Star** on G
 It helps others discover the project and motivates further development.
 
 ---
-
-# 📄 License
-
-This project is licensed under the **MIT License**.
