@@ -322,6 +322,7 @@ export const generateInvoice=[
 if (customerEmail?.trim()) {
   console.log("ABOUT TO SEND EMAIL to:", customerEmail.trim());
   try {
+    console.log("MAIL SEND STARTED")
     const result = await sendEmail({
       email: customerEmail.trim(),
       subject: `Your Invoice ${invoice.invoiceNo}`,

@@ -10,6 +10,7 @@ export const uploadPdfToCloudinary = (pdfBuffer, invoiceNo) => {
         overwrite: true,
         flags: "attachment",
       },
+      
       (error, result) => {
         if (error) return reject(error);
         resolve(result);

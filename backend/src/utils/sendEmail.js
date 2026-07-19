@@ -1,43 +1,34 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // STARTTLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-  connectionTimeout: 10000,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export const sendEmail = async ({
   email,
   subject,
   html,
   attachments = [],
 }) => {
-  if (!process.env.EMAIL_USER) {
-    throw new Error("EMAIL_USER is missing");
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is missing");
   }
 
-  if (!process.env.EMAIL_PASSWORD) {
-    throw new Error("EMAIL_PASSWORD is missing");
-  }
-
-  const info = await transporter.sendMail({
-    from: `"${process.env.EMAIL_FROM_NAME || "Smart Billing"}" <${process.env.EMAIL_USER}>`,
+  const { data, error } = await resend.emails.send({
+    from: `${process.env.EMAIL_FROM_NAME || "Smart Billing"} <onboarding@resend.dev>`,
     to: email,
     subject,
     html,
-    attachments,
+    attachments: attachments.map((a) => ({
+      filename: a.filename,
+      content: a.content.toString("base64"),
+    })),
   });
 
-  console.log("EMAIL RESULT", {
-    accepted: info.accepted,
-    rejected: info.rejected,
-    response: info.response,
-    messageId: info.messageId,
-  });
+  if (error) {
+    console.error("Resend email failed:", error);
+    throw new Error(error.message || "Resend failed to send email");
+  }
 
-  return info;
+  console.log("EMAIL RESULT", data);
+
+  return data;
 };
